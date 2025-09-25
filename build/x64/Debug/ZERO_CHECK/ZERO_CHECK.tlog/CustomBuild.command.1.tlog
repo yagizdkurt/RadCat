@@ -1,0 +1,10 @@
+^C:\USERS\WWW\DESKTOP\YDPT\BUILD\CMAKEFILES\67073B56EEFB8E8B7D4E6F7AD6DFD465\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/WWW/Desktop/YDPT -BC:/Users/WWW/Desktop/YDPT/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/WWW/Desktop/YDPT/build/YDYTU1.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
