@@ -6,7 +6,7 @@ from PyInstaller.utils.hooks import collect_submodules
 
 # Paths
 spec_dir = os.getcwd()
-python_program_folder = os.path.join(spec_dir, 'PythonProgram')
+python_program_folder = os.path.join(spec_dir, 'pyt')
 main_script = os.path.join(python_program_folder, 'main.py')
 parent_folder = spec_dir  # Output folder for EXE
 print(f"[PyInstaller SPEC] Output distpath will be: {parent_folder}")
@@ -60,7 +60,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='YDPT_Test',
+    name='TextExe',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -84,5 +84,5 @@ coll = COLLECT(
     upx=True,
     upx_exclude=[],
     name='YDPT_Test',
-    distpath=parent_folder
+    distpath=spec_dir
 )

@@ -1,4 +1,0 @@
-C:/Users/WWW/Desktop/YDPT/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/WWW/Desktop/YDPT/build/CMakeFiles/ZERO_CHECK.dir
-C:/Users/WWW/Desktop/YDPT/build/src/CMakeFiles/YDYTU1_lib.dir
-C:/Users/WWW/Desktop/YDPT/build/pystuff/CMakeFiles/YDYTU1_py.dir

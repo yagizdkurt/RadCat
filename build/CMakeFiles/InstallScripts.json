@@ -1,9 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"C:/Users/WWW/Desktop/YDPT/build/cmake_install.cmake",
-		"C:/Users/WWW/Desktop/YDPT/build/src/cmake_install.cmake",
-		"C:/Users/WWW/Desktop/YDPT/build/pystuff/cmake_install.cmake"
-	],
-	"Parallel" : false
-}

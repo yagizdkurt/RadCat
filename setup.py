@@ -1,25 +1,29 @@
 from setuptools import setup, Extension
 import pybind11
 from pathlib import Path
+import sys
 
-# Collect all .cpp files in src/
-sources = [str(p) for p in Path("src").rglob("*.cpp")]
+src_dir = Path(__file__).parent / "src"
+cpp_sources = [str(p) for p in src_dir.glob("*.cpp")]
+
+extra_compile_args = []
+if sys.platform == "win32":
+    extra_compile_args = ["/std:c++20"]  # MSVC syntax
+else:
+    extra_compile_args = ["-std=c++20"]  # GCC/Clang syntax
 
 ext_modules = [
     Extension(
-        "your_module",      # Python import name
-        sources,            # all sources under src/
-        include_dirs=[pybind11.get_include()],
+        "YDYTU1_py",
+        cpp_sources,
+        include_dirs=[pybind11.get_include(), str(src_dir.resolve())],
         language="c++",
-        extra_compile_args=["-std=c++17"],
-    ),
+        extra_compile_args=extra_compile_args,
+    )
 ]
 
 setup(
-    name="your_module",
+    name="YDYTU1_py",
     version="0.1.0",
-    author="Your Name",
-    description="C++ classes exposed to Python via pybind11",
     ext_modules=ext_modules,
-    zip_safe=False,
 )
