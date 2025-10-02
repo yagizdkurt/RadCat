@@ -49,6 +49,29 @@ struct DebugClass {
     inline static void Log(const std::string& msg, int LinesBeforeMessage=1)    { print("[DEBUG]:", msg, Color::WHITE, false, LinesBeforeMessage); }
     inline static void Warn(const std::string& msg, int LinesBeforeMessage=1)   { print("[WARNING]:", msg, Color::YELLOW, false, LinesBeforeMessage); }
     inline static void Error(const std::string& msg, int LinesBeforeMessage=1)  { print("[ERROR]:", msg, Color::RED, true, LinesBeforeMessage); }
+
+    //Templated function for any type
+    template<typename T>
+    inline static void Log(const std::string& prefix, const T& msg, int LinesBeforeMessage=1) {
+        std::ostringstream oss;
+        oss << prefix << " " << msg;
+        Log(oss.str(), LinesBeforeMessage);
+    }
+
+    template<typename T>
+    inline static void Warn(const std::string& prefix, const T& msg, int LinesBeforeMessage=1) {
+        std::ostringstream oss;
+        oss << prefix << " " << msg;
+        Warn(oss.str(), LinesBeforeMessage);
+    }
+
+    template<typename T>
+    inline static void Error(const std::string& prefix, const T& msg, int LinesBeforeMessage=1) {
+        std::ostringstream oss;
+        oss << prefix << " " << msg;
+        Error(oss.str(), LinesBeforeMessage);
+    }
+
 };
 
 inline DebugClass& Debug = DebugClass::getInstance();
