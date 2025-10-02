@@ -35,9 +35,9 @@ pyinstaller MyProgram.spec
 
 rmdir /s /q build
 
-cd pyt
-del /q YDYTU1_py.cp39-win_amd64.pyd
-cd ..
+REM cd pyt
+REM del /q YDYTU1_py.cp39-win_amd64.pyd
+REM cd ..
 
 for /l %%i in (1,1,30) do echo.
 echo Everything is complete, check the 'dist' folder for output.

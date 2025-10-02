@@ -26,7 +26,9 @@ using namespace std;
 
     bool App::systemInitializor() {
         bool CurrentStatus = true;
-        Debug.Log("System Initializing...");
+        Debug.Log("==================================");
+        Debug.Log("System Initializing..");
+        Debug.Log("C++ Version: C++17");
 
         //Initialize Data Handler
         Debug.Log("Initializing Data Handler...");

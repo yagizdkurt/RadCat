@@ -7,4 +7,6 @@ PYBIND11_MODULE(YDYTU1_py, m) {
         .def(py::init<>())
         .def("run", &App::run)
         .def("stop", &App::stop);
+        .def("connectMiniX", &App::connectMiniX)
+        .def("disconnectMiniX", &App::disconnectMiniX);
 }
