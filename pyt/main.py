@@ -9,4 +9,6 @@ def cleanup():
 atexit.register(cleanup)
 
 # Create UI in main thread
-window1 = UserInterface.CreateUserInterface1()
+mainUI = UserInterface.MainUI()
+mainUI.AppClass = app
+

@@ -9,6 +9,9 @@ private:
 
 public:
 
+    //Modules
+    DIOHandler dataHandler;
+
     App() { if(systemInitializor()) run(); }
 
     //Main Methods
@@ -16,5 +19,10 @@ public:
     void logic();
     void stop();
     bool systemInitializor();
+
+
+    // PYTHON INTERFACE METHODS
+    void connectMiniX();
+    void disconnectMiniX();
 
 };

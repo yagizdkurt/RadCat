@@ -1,9 +1,29 @@
 #include "DataIOHandler.hpp"
 
-void DIOHandler::dataHandlerInit(){
+
+bool DIOHandler::dataHandlerInit(){
     buffer = (char*)malloc(sizeof(char)*socketBufferSize);
+    if(buffer == nullptr){Debug.Error("Failed to allocate memory for UDP buffer.");return false;}
+
+
+    return true;
 }
 
+
+//INTERFACE METHODS
+void DIOHandler::connectMiniX(){
+    Debug.Log("Connecting to MiniX...");
+    getConnectedDevices();
+}
+
+void DIOHandler::disconnectMiniX(){
+    Debug.Log("Disconnecting from MiniX...");
+    closeDevice();
+}
+
+
+
+// USB FTDI D2XX HANDLER METHODS
 void DIOHandler::getConnectedDevices() {
     if (m_isDeviceOpen) {
         Debug.Log("Device is already open.");
@@ -19,7 +39,6 @@ void DIOHandler::getConnectedDevices() {
         Debug.Error("Error getting device list: " , status);
         return;
     }
-
     Debug.Log("Number of connected devices: " , numDevs);
 
     for (DWORD i = 0; i < numDevs; i++) {
@@ -28,12 +47,12 @@ void DIOHandler::getConnectedDevices() {
                                         &devInfo.LocId, devInfo.SerialNumber,
                                         devInfo.Description, &devInfo.ftHandle);
         if (status == FT_OK) {
-            std::cout << "Device " << i << ": " << devInfo.Description
-                      << ", Serial Number: " << devInfo.SerialNumber
-                      << ", ID: " << std::hex << devInfo.ID << std::dec
-                      << ", Location ID: " << devInfo.LocId << std::endl;
+            Debug.Log("Device:" + std::to_string(i) + " - " + devInfo.Description);
+            Debug.Log("Serial Number:", devInfo.SerialNumber);
+            Debug.Log("ID:", std::to_string(devInfo.ID));
+            Debug.Log("Location ID:", std::to_string(devInfo.LocId));
         } else {
-            std::cerr << "Error getting device info for device " << i << ": " << status << std::endl;
+            Debug.Error("Error getting device info for device " + std::to_string(i) + ": " , status);
         }
     }
 }

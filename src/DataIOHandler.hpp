@@ -7,7 +7,12 @@ public:
     DIOHandler() {}
     ~DIOHandler() {}
 
-    void dataHandlerInit();
+    bool dataHandlerInit();
+    void connectMiniX();
+    void disconnectMiniX();
+
+
+
     bool openDevice(int deviceIndex);
     void closeDevice();
     bool writeBytes(const unsigned char* data, DWORD length);

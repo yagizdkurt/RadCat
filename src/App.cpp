@@ -28,17 +28,30 @@ using namespace std;
         bool CurrentStatus = true;
         Debug.Log("System Initializing...");
 
-        // Perform initialization tasks here
+        //Initialize Data Handler
+        Debug.Log("Initializing Data Handler...");
+        if(dataHandler.dataHandlerInit()){Debug.Log("Data Handler Initialized Successfully.");} 
+        else {Debug.Error("Data Handler Initialization Failed!"); CurrentStatus = false;}
 
 
         if (CurrentStatus) isRunning = true;
-        else{
-            Debug.Error("System Initialization Failed!",5);
-            isRunning = false;
-        }
+        else{Debug.Error("System Initialization Failed!",5); isRunning = false;}
         return CurrentStatus;
     }
 
     void App::logic(){
 
     }
+
+
+
+
+
+// PYTHON INTERFACE METHODS
+#pragma region: PYTHON METHODS ----
+
+    void App::connectMiniX(){dataHandler.connectMiniX();}
+
+    void App::disconnectMiniX(){dataHandler.disconnectMiniX();}
+
+#pragma endregion: PYTHON METHODS ----
