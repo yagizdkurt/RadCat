@@ -3,10 +3,10 @@
 namespace py = pybind11;
 
 PYBIND11_MODULE(YDYTU1_py, m) {
-    py::class_<App>(m, "App")
+    py::class_<Controller>(m, "Controller")
         .def(py::init<>())
-        .def("run", &App::run)
-        .def("stop", &App::stop);
-        .def("connectMiniX", &App::connectMiniX)
-        .def("disconnectMiniX", &App::disconnectMiniX);
+        .def("run", &Controller::run)
+        .def("stop", &Controller::stop)
+        .def("connectMiniX", &Controller::connectMiniX)
+        .def("disconnectMiniX", &Controller::disconnectMiniX);
 }

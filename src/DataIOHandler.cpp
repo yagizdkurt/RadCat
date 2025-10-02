@@ -18,7 +18,7 @@ void DIOHandler::connectMiniX(){
 
 void DIOHandler::disconnectMiniX(){
     Debug.Log("Disconnecting from MiniX...");
-    closeDevice();
+    //closeDevice();
 }
 
 
@@ -54,5 +54,16 @@ void DIOHandler::getConnectedDevices() {
         } else {
             Debug.Error("Error getting device info for device " + std::to_string(i) + ": " , status);
         }
+    }
+}
+
+
+void DIOHandler::closeDevice() {
+    if (m_isDeviceOpen) {
+        FT_Close(ftHandle);
+        m_isDeviceOpen = false;
+        Debug.Log("Device closed.");
+    } else {
+        Debug.Log("No device is open.");
     }
 }

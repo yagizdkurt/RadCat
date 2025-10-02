@@ -1,5 +1,6 @@
 #pragma once
 #include "includes.hpp"
+#include "ftd2xx.h"
 
 class DIOHandler {
     

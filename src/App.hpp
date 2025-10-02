@@ -1,6 +1,6 @@
 #include "Includes.hpp"
 
-class App{
+class Controller{
 private:
 
     std::mutex dataMutex;
@@ -12,7 +12,7 @@ public:
     //Modules
     DIOHandler dataHandler;
 
-    App() { if(systemInitializor()) run(); }
+    Controller() { if(systemInitializor()) run(); }
 
     //Main Methods
     void run();

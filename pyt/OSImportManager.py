@@ -1,11 +1,14 @@
 import sys
 
 if sys.platform.startswith("win"):
-    import YDYTU1_py as App
+    print("You are using Windows")
+    import YDYTU1_py as controller
 elif sys.platform.startswith("linux"):
-    import YDYTU1_py as App
+    print("You are using Linux")
+    import YDYTU1_py as controller
 elif sys.platform.startswith("darwin"):
-    import YDYTU1_py as App
+    print("You are using MacOS")
+    import YDYTU1_py as controller
 else:
     raise RuntimeError("Unsupported platform!")
 

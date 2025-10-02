@@ -2,6 +2,7 @@
 import os
 import glob
 import sys
+from pathlib import Path
 from PyInstaller.utils.hooks import collect_submodules
 
 # Paths
@@ -36,6 +37,8 @@ def find_msvc_dlls():
 
 msvc_dlls = find_msvc_dlls()
 binaries = [(dll, '.') for dll in msvc_dlls]  # Copy next to EXE
+binaries.append((str((Path(spec_dir) / "src" / "libs" / "FTD2XX64.dll").resolve()), '.'))
+
 
 # --- Analysis ---
 a = Analysis(

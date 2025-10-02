@@ -4,6 +4,7 @@ from pathlib import Path
 import sys
 
 src_dir = Path(__file__).parent / "src"
+libs_dir = src_dir / "libs"
 cpp_sources = [str(p) for p in src_dir.glob("*.cpp")]
 
 extra_compile_args = []
@@ -17,6 +18,8 @@ ext_modules = [
         "YDYTU1_py",
         cpp_sources,
         include_dirs=[pybind11.get_include(), str(src_dir.resolve())],
+        libraries=["ftd2xx"],
+        library_dirs=[str(libs_dir.resolve())],
         language="c++",
         extra_compile_args=extra_compile_args,
     )

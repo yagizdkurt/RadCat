@@ -5,18 +5,15 @@ from tkinter import ttk
 class MainUI:
 
 # region: ----Global Variables----
-    AppClass = None
 
-
-    # region: ---- UI Variables ----
-
-    tryingToConnectMinix = False
-
-    # endregion
+    def defineVariables(self):
+        self.controllerClass = None
+        self.tryingToConnectMinix = False
 
 # endregion
 
     def __init__(self):
+        self.defineVariables()
         self.setupWindow()
         self.setStyle()
         self.setupMainFrames()
@@ -27,7 +24,6 @@ class MainUI:
         self.setupBottomFrame()
 
         self.eventBinds()
-        self.window.mainloop()
 
 
 # region: styling
@@ -342,8 +338,8 @@ class MainUI:
 # region: ---- Wrapper Functions ----
 
     def OnPressConnectMinix(self):
-        if self.AppClass is not None:
-            self.AppClass.connectMiniX()
+        if self.controllerClass is not None:
+            self.controllerClass.connectMiniX()
             self.tryingToConnectMinix = True
             self.ConnectButton.config(text = "Connecting...")
             self.ConnectButton.config(state = "disabled")

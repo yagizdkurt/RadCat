@@ -1,7 +1,7 @@
 #include "App.hpp"
 using namespace std;
 
-    void App::run(){
+    void Controller::run(){
         //Create and start the logic thread
         LogicThread = thread([this]() {
         while (isRunning) {
@@ -17,14 +17,14 @@ using namespace std;
         });
     }
 
-    void App::stop() {
+    void Controller::stop() {
         isRunning = false;
         if (LogicThread.joinable()) LogicThread.join();
         //End logic here
 
     }
 
-    bool App::systemInitializor() {
+    bool Controller::systemInitializor() {
         bool CurrentStatus = true;
         Debug.Log("==================================");
         Debug.Log("System Initializing..");
@@ -41,7 +41,7 @@ using namespace std;
         return CurrentStatus;
     }
 
-    void App::logic(){
+    void Controller::logic(){
 
     }
 
@@ -52,8 +52,8 @@ using namespace std;
 // PYTHON INTERFACE METHODS
 #pragma region: PYTHON METHODS ----
 
-    void App::connectMiniX(){dataHandler.connectMiniX();}
+    void Controller::connectMiniX(){dataHandler.connectMiniX();}
 
-    void App::disconnectMiniX(){dataHandler.disconnectMiniX();}
+    void Controller::disconnectMiniX(){dataHandler.disconnectMiniX();}
 
 #pragma endregion: PYTHON METHODS ----

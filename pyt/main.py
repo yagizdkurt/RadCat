@@ -1,14 +1,20 @@
+import platform
+print(platform.architecture())
+
 import OSImportManager
 import UserInterface
 import atexit
 
 # Create App thread and clean on exit
-app = OSImportManager.App.App() # Start initalization and logic loop if initalization is successful
+controller = OSImportManager.controller.Controller() # Start initalization and logic loop if initalization is successful
 def cleanup():
-    app.stop()
+    controller.stop()
 atexit.register(cleanup)
 
-# Create UI in main thread
+# Create and initialize UI
 mainUI = UserInterface.MainUI()
-mainUI.AppClass = app
 
+# Link UI to controller
+mainUI.controllerClass = controller
+
+mainUI.window.mainloop() # Start UI loop (Blocking)
