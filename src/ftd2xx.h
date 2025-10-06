@@ -50,6 +50,26 @@ Revision History:
 // FTD2XX_API functions as being imported from a DLL, whereas this DLL
 // sees symbols defined with this macro as being exported.
 
+#ifdef _WIN32
+    #include <windows.h>
+    #include <winbase.h>
+#else
+    // Define Windows types for other platforms
+    typedef void* PVOID;
+    typedef unsigned long ULONG;
+    typedef unsigned long DWORD;
+    typedef void* LPVOID;
+    typedef DWORD* LPDWORD;
+    typedef unsigned short WORD;
+    typedef WORD* LPWORD;
+    typedef unsigned char UCHAR;
+    typedef UCHAR* PUCHAR;
+    typedef char* PCHAR;
+    typedef unsigned short USHORT;
+    typedef const char* LPCTSTR;
+    // ... add other type definitions as needed
+#endif
+
 #ifdef FTD2XX_EXPORTS
 #define FTD2XX_API __declspec(dllexport)
 #else

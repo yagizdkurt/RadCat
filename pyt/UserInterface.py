@@ -4,15 +4,24 @@ from tkinter import ttk
 
 class MainUI:
 
-# region: ----Global Variables----
+# region: ----Global Variables and main starter ----
 
     def defineVariables(self):
+        self.debug = False
         self.controllerClass = None
         self.tryingToConnectMinix = False
+        self.connectedToMinix = False
+
+    def starter(self):
+        if self.initFinished:
+            self.TryFetchingDataMiniX()
+        else:
+            self.window.after(100, self.starter)
 
 # endregion
 
     def __init__(self):
+        self.initFinished = False
         self.defineVariables()
         self.setupWindow()
         self.setStyle()
@@ -24,7 +33,7 @@ class MainUI:
         self.setupBottomFrame()
 
         self.eventBinds()
-
+        self.initFinished = True
 
 # region: styling
     def setStyle(self):
@@ -347,9 +356,74 @@ class MainUI:
         if self.controllerClass is not None:
             self.controllerClass.connectMiniX()
             self.tryingToConnectMinix = True
-            self.ConnectButton.config(text = "Connecting...")
-            self.ConnectButton.config(state = "disabled")
+            self.minixDeviceFound = False
+            self.connectedToMinix = False
+            self.ConnectButton.config(text = "Trying to find Mini-X...", state = "disabled", bg="yellow")
+        self.window.after(500, self.CheckConnectionToMinixSetup)
 
+    def CheckConnectionToMinixSetup(self):
+        if self.controllerClass is None:
+            print("BIG ERROR: Controller class not linked to UI")
+            return
+        if self.controllerClass.connectedToMinix == True:
+            self.connectedToMinix = True
+            self.tryingToConnectMinix = False
+            self.ConnectButton.config(text="Connected", state="disabled", bg="green")
+            return
+        if self.controllerClass.connectedToMinix == False and self.controllerClass.tryingToConnectMinix == False:
+            if self.debug:
+                print("Not trying to connect to Mini-X")
+            self.tryingToConnectMinix = False
+            self.connectedToMinix = False
+            self.ConnectButton.config(text="Not Connected, Try again", state="normal", bg="red")
+            return
+        if self.controllerClass.minixDeviceFound == True:
+            self.ConnectButton.config(text="Device Found. Connecting...", state="disabled", bg="yellow")
+            self.window.after(500, self.CheckConnectionToMinixSetup)
+            return
+        elif self.controllerClass.minixOpened == True:
+            self.ConnectButton.config(text="Device Opened. Initializing...", state="disabled", bg="yellow")
+            self.window.after(500, self.CheckConnectionToMinixSetup)
+            return
+
+        
+
+    def TryFetchingDataMiniX(self):
+        if self.controllerClass is None:
+            print("BIG ERROR: Controller class not linked to UI")
+            return
+        if self.connectedToMinix == True:
+            if self.controllerClass.newDataAvailable:
+                # Calculate power from voltage and current
+                voltage = self.controllerClass.latestVoltage  # kV
+                current = self.controllerClass.latestCurrent  # µA
+                temperature = self.controllerClass.latestTemperature  # °C
+                
+                # Calculate power: P = V * I (convert units: kV * µA = mW)
+                power = voltage * current  # mW
+                
+                # Update UI with proper formatting
+                self.powerInfoBox.config(text=f"{power:.1f}")
+                self.temperatureInfoBox.config(text=f"{temperature:.1f}")
+                
+                # Update connection status
+                if self.controllerClass.isDeviceOpen and self.tryingToConnectMinix:
+                    self.connectedToMinix = True
+                    self.tryingToConnectMinix = False
+                    self.ConnectButton.config(text="Connected", state="normal", bg="green")
+            else:
+                # No new data, just check connection status
+                if self.controllerClass.isDeviceOpen:
+                    self.ConnectButton.config(text="Connected", state="normal", bg="green")
+        else:
+            if self.tryingToConnectMinix == True:
+                if self.debug:
+                    print("Trying to connect to Mini-X...")
+            elif self.tryingToConnectMinix == False:
+                if self.debug:
+                    print("Not connected to Mini-X.")
+
+        self.window.after(500, self.TryFetchingDataMiniX)
 
 
 # endregion

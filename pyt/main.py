@@ -16,5 +16,6 @@ mainUI = UserInterface.MainUI()
 
 # Link UI to controller
 mainUI.controllerClass = controller
+mainUI.starter() # Start loop functions
 
 mainUI.window.mainloop() # Start UI loop (Blocking)

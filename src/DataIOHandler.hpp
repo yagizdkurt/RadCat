@@ -1,30 +1,26 @@
 #pragma once
-#include "includes.hpp"
 #include "ftd2xx.h"
-#ifdef _WIN32
 #include <windows.h>
-#else
-#include <unistd.h>
-#endif
+
+class Controller;
 
 class DIOHandler {
     
 public:
-    DIOHandler() {}
+    Controller* controller;
+    DIOHandler(Controller* ctrl) : controller(ctrl) {}
     ~DIOHandler() {}
 
     bool dataHandlerInit();
     void connectMiniX();
     void disconnectMiniX();
 
-
-
-    bool openDevice(int deviceIndex);
+    bool openDevice(const char* serialNumber);
     void closeDevice();
     bool writeBytes(const unsigned char* data, DWORD length);
     bool readBytes(unsigned char* buffer, DWORD length);
     void tryConnect();
-    void getConnectedDevices();
+    int getConnectedDevices();
     
     // MiniX initialization and control methods
     bool initializeMiniX();
@@ -34,6 +30,8 @@ public:
     void setVoltage(double voltage);
     void setCurrent(double current);
     double readVoltage();
+    double readCurrent();
+    double readTemperature();
 
 
 
