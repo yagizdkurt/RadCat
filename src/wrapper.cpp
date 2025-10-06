@@ -8,5 +8,6 @@ PYBIND11_MODULE(YDYTU1_py, m) {
         .def("run", &Controller::run)
         .def("stop", &Controller::stop)
         .def("connectMiniX", &Controller::connectMiniX)
+        .def("testButton", &Controller::testButton)
         .def("disconnectMiniX", &Controller::disconnectMiniX);
 }

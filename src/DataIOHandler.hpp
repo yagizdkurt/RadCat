@@ -1,6 +1,11 @@
 #pragma once
 #include "includes.hpp"
 #include "ftd2xx.h"
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
 
 class DIOHandler {
     
@@ -20,6 +25,15 @@ public:
     bool readBytes(unsigned char* buffer, DWORD length);
     void tryConnect();
     void getConnectedDevices();
+    
+    // MiniX initialization and control methods
+    bool initializeMiniX();
+    bool setupGPIOLines();
+    bool setupTemperatureSensor();
+    bool setClockDivisor();
+    void setVoltage(double voltage);
+    void setCurrent(double current);
+    double readVoltage();
 
 
 
@@ -30,6 +44,12 @@ public:
     DWORD bytesWritten;
     DWORD bytesRead;
     bool m_isDeviceOpen = false;
+    bool m_isMpsseOn = false;
+    
+    // Hardware state variables
+    unsigned char LowByteHiLowState;
+    unsigned char HighByteHiLowState;
+    bool hvOn = false;
 
 
     //UDP SOCKET

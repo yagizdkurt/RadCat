@@ -180,6 +180,10 @@ class MainUI:
     
     def OnPressVoltageOff(self, *args):
         return
+    
+    def UItestButton(self):
+        if self.controllerClass is not None:
+            self.controllerClass.testButton()
 
 
 
@@ -283,6 +287,8 @@ class MainUI:
         self.HVONButton.place(x=20 , y= 220)
         self.HVOFFButton = tk.Button(xRayTab, text = "Voltage OFF", font = ("Arial",15,"bold"), bg = "red", command = self.OnPressVoltageOff)
         self.HVOFFButton.place(x=150, y=220)
+        self.testButton = tk.Button(xRayTab, text = "Test", font = ("Arial",15,"bold"), bg = "yellow", command = self.UItestButton)
+        self.testButton.place(x=100, y=270)
 
         #endregion
 

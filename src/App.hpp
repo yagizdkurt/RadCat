@@ -24,5 +24,6 @@ public:
     // PYTHON INTERFACE METHODS
     void connectMiniX();
     void disconnectMiniX();
+    void testButton();
 
 };
