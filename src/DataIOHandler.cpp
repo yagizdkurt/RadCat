@@ -533,18 +533,78 @@ void DIOHandler::testread(){
 void DIOHandler::testread2(){
     Debug.Log("=== STARTING BASIC DEVICE TEST ===");
     
-    // ✅ Test 1: Check if device handle is valid
+    // ✅ Enhanced Test 1: Check device handle and detailed status
+    Debug.Log("TEST 1: Checking device handle...");
     if (ftHandle == NULL) {
         Debug.Error("TEST FAILED: Device handle is NULL - device not opened");
+        Debug.Log("Check if you called connectMiniX() successfully first");
         return;
     }
-    Debug.Log("TEST PASS: Device handle is valid");
+    Debug.Log("TEST PASS: Device handle is not NULL");
+    Debug.Log("Device handle value: " + std::to_string((uintptr_t)ftHandle));
     
-    // ✅ Test 2: Check device status
+    // ✅ Additional device info checks
+    Debug.Log("TEST 1b: Checking device state variables...");
+    Debug.Log("m_isDeviceOpen: " + std::string(m_isDeviceOpen ? "true" : "false"));
+    Debug.Log("m_isMpsseOn: " + std::string(m_isMpsseOn ? "true" : "false"));
+    Debug.Log("m_minixDeviceFound: " + std::string(m_minixDeviceFound ? "true" : "false"));
+    
+    // ✅ Test 1c: Try to get device info
+    Debug.Log("TEST 1c: Trying to get device information...");
+    char serialNumber[16] = {0};
+    char description[64] = {0};
+    FT_STATUS infoStatus = FT_GetDeviceInfo(ftHandle, NULL, NULL, serialNumber, description, NULL);
+    if (infoStatus == FT_OK) {
+        Debug.Log("TEST PASS: Device info accessible");
+        Debug.Log("Serial: " + std::string(serialNumber));
+        Debug.Log("Description: " + std::string(description));
+    } else {
+        Debug.Error("TEST WARNING: Cannot get device info - error: " + std::to_string(infoStatus));
+        Debug.Log("This suggests the device handle might be invalid");
+    }
+    
+    // ✅ Enhanced Test 2: Check device status with more details
+    Debug.Log("TEST 2: Checking device modem status...");
     DWORD modemStatus = 0;
     FT_STATUS status = FT_GetModemStatus(ftHandle, &modemStatus);
     if (status != FT_OK) {
         Debug.Error("TEST FAILED: Cannot get device status - error: " + std::to_string(status));
+        
+        // Provide detailed error analysis
+        switch(status) {
+            case FT_INVALID_HANDLE:
+                Debug.Error("Error Analysis: FT_INVALID_HANDLE - Device handle is invalid");
+                Debug.Log("Solution: Check if device was properly opened");
+                break;
+            case FT_DEVICE_NOT_FOUND:
+                Debug.Error("Error Analysis: FT_DEVICE_NOT_FOUND - Device disconnected");
+                Debug.Log("Solution: Check USB connection and reconnect device");
+                break;
+            case FT_DEVICE_NOT_OPENED:
+                Debug.Error("Error Analysis: FT_DEVICE_NOT_OPENED - Device not opened");
+                Debug.Log("Solution: Call connectMiniX() first");
+                break;
+            case FT_IO_ERROR:
+                Debug.Error("Error Analysis: FT_IO_ERROR - Communication error");
+                Debug.Log("Solution: Check drivers and USB connection");
+                break;
+            default:
+                Debug.Error("Error Analysis: Unknown FTDI error code: " + std::to_string(status));
+        }
+        
+        // Try to diagnose further
+        Debug.Log("DIAGNOSIS: Attempting to check if device is still connected...");
+        DWORD numDevices = 0;
+        FT_STATUS listStatus = FT_CreateDeviceInfoList(&numDevices);
+        if (listStatus == FT_OK) {
+            Debug.Log("Device list status: " + std::to_string(numDevices) + " FTDI devices found");
+            if (numDevices == 0) {
+                Debug.Error("DIAGNOSIS: No FTDI devices found - device may be disconnected");
+            }
+        } else {
+            Debug.Error("DIAGNOSIS: Cannot even list FTDI devices - driver issue?");
+        }
+        
         return;
     }
     Debug.Log("TEST PASS: Device status readable, modem status = 0x" + 
@@ -675,6 +735,54 @@ void DIOHandler::testread2(){
     Debug.Log("If you see 'DEVICE COMMUNICATION IS WORKING' above,");
     Debug.Log("then your FTDI connection is good and the temperature");
     Debug.Log("issue is in the sensor-specific protocol.");
+}
+
+void DIOHandler::debugConnectionStatus() {
+    Debug.Log("=== CONNECTION STATUS DEBUG ===");
+    
+    // Check global device state
+    Debug.Log("Device State Variables:");
+    Debug.Log("  m_isDeviceOpen: " + std::string(m_isDeviceOpen ? "true" : "false"));
+    Debug.Log("  m_isMpsseOn: " + std::string(m_isMpsseOn ? "true" : "false"));
+    Debug.Log("  m_minixDeviceFound: " + std::string(m_minixDeviceFound ? "true" : "false"));
+    
+    // Check controller state (if accessible)
+    if (controller != nullptr) {
+        Debug.Log("Controller State Variables:");
+        Debug.Log("  controller->m_connectedToMinix: " + std::string(controller->m_connectedToMinix ? "true" : "false"));
+        Debug.Log("  controller->m_tryingToConnectMinix: " + std::string(controller->m_tryingToConnectMinix ? "true" : "false"));
+        Debug.Log("  controller->m_minixDeviceFound: " + std::string(controller->m_minixDeviceFound ? "true" : "false"));
+        Debug.Log("  controller->m_minixOpened: " + std::string(controller->m_minixOpened ? "true" : "false"));
+    }
+    
+    // Check device handle
+    if (ftHandle != NULL) {
+        Debug.Log("Device Handle: Valid (not NULL)");
+        
+        // Try basic device info
+        char serial[16] = {0};
+        char desc[64] = {0};
+        FT_STATUS status = FT_GetDeviceInfo(ftHandle, NULL, NULL, serial, desc, NULL);
+        if (status == FT_OK) {
+            Debug.Log("  Serial: " + std::string(serial));
+            Debug.Log("  Description: " + std::string(desc));
+        } else {
+            Debug.Error("  Cannot get device info - error: " + std::to_string(status));
+        }
+    } else {
+        Debug.Error("Device Handle: NULL (not opened)");
+    }
+    
+    // Check how many FTDI devices are available
+    DWORD numDevices = 0;
+    FT_STATUS listStatus = FT_CreateDeviceInfoList(&numDevices);
+    if (listStatus == FT_OK) {
+        Debug.Log("Total FTDI Devices Available: " + std::to_string(numDevices));
+    } else {
+        Debug.Error("Cannot enumerate FTDI devices - driver issue?");
+    }
+    
+    Debug.Log("=== END CONNECTION STATUS DEBUG ===");
 }
 
 # pragma region Minix Setup

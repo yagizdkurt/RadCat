@@ -58,7 +58,9 @@ using namespace std;
     }
 
     void Controller::testButton(){
-        dataHandler.testread2();
+        Debug.Log("=== STARTING DEVICE DIAGNOSTICS ===");
+        dataHandler.debugConnectionStatus();  // Check current state first
+        dataHandler.testread2();               // Then run the comprehensive test
     }
 
 

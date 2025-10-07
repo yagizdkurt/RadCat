@@ -34,6 +34,7 @@ public:
     double readTemperature();
     void testread();
     void testread2();
+    void debugConnectionStatus();
 
 
 
