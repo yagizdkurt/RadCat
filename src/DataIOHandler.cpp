@@ -457,6 +457,78 @@ double DIOHandler::readTemperature() {
     return temperature;
 }
 
+void DIOHandler::testread(){
+    if (!m_isDeviceOpen || !m_isMpsseOn) {
+        Debug.Error("Device not open or MPSSE not enabled for test read.");
+        return;
+    }
+
+    Debug.Log("Starting basic device read test...");
+
+    // Read GPIO status - simplest possible read operation
+    unsigned char tx[10], rx[10];
+    DWORD ret_bytes;
+    int pos = 0;
+
+    // Command to read low byte GPIO status
+    tx[pos++] = 0x81; // Read Data Bits Low Byte command
+
+    // Send the command
+    FT_STATUS status = FT_Write(ftHandle, tx, pos, &ret_bytes);
+    if (status != FT_OK) {
+        Debug.Error("Test read: Failed to send GPIO read command, status: ", status);
+        return;
+    }
+
+    Debug.Log("Test read: GPIO read command sent successfully");
+
+    // Small delay
+#ifdef _WIN32
+    Sleep(100); // 100ms delay
+#else
+    usleep(100000);
+#endif
+
+    // Read the response
+    status = FT_Read(ftHandle, rx, 1, &ret_bytes);
+    if (status != FT_OK) {
+        Debug.Error("Test read: Failed to read GPIO data, status: ", status);
+        return;
+    }
+
+    if (ret_bytes < 1) {
+        Debug.Error("Test read: No data bytes returned: ", ret_bytes);
+        return;
+    }
+
+    // Log the raw GPIO state
+    Debug.Log("Test read SUCCESS: GPIO Low Byte = 0x" + 
+              std::string(1, "0123456789ABCDEF"[rx[0] >> 4]) + 
+              std::string(1, "0123456789ABCDEF"[rx[0] & 0x0F]) + 
+              " (decimal: " + std::to_string((int)rx[0]) + ")");
+
+    // Test reading high byte as well
+    pos = 0;
+    tx[pos++] = 0x83; // Read Data Bits High Byte command
+    
+    status = FT_Write(ftHandle, tx, pos, &ret_bytes);
+    if (status == FT_OK) {
+#ifdef _WIN32
+        Sleep(100);
+#else
+        usleep(100000);
+#endif
+        status = FT_Read(ftHandle, rx, 1, &ret_bytes);
+        if (status == FT_OK && ret_bytes >= 1) {
+            Debug.Log("Test read SUCCESS: GPIO High Byte = 0x" + 
+                      std::string(1, "0123456789ABCDEF"[rx[0] >> 4]) + 
+                      std::string(1, "0123456789ABCDEF"[rx[0] & 0x0F]) + 
+                      " (decimal: " + std::to_string((int)rx[0]) + ")");
+        }
+    }
+
+    Debug.Log("Basic device read test completed.");
+}
 
 # pragma region Minix Setup
 

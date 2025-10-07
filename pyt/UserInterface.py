@@ -393,7 +393,7 @@ class MainUI:
             print("BIG ERROR: Controller class not linked to UI")
             return
         if self.connectedToMinix == True:
-            if self.controllerClass.isDeviceOpen == False:
+            if self.controllerClass.minixOpened == False:
                 self.connectedToMinix = False
                 self.tryingToConnectMinix = False
                 self.ConnectButton.config(text="Connection lost. Reconnect.", state="normal", bg="red")

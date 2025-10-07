@@ -32,6 +32,7 @@ public:
     double readVoltage();
     double readCurrent();
     double readTemperature();
+    void testread();
 
 
 

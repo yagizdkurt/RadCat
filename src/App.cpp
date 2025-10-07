@@ -58,7 +58,7 @@ using namespace std;
     }
 
     void Controller::testButton(){
-        dataHandler.readTemperature();
+        dataHandler.testread();
     }
 
 
