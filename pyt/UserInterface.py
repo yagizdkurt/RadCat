@@ -393,8 +393,12 @@ class MainUI:
             print("BIG ERROR: Controller class not linked to UI")
             return
         if self.connectedToMinix == True:
-            if self.controllerClass.newDataAvailable:
-                # Calculate power from voltage and current
+            if self.controllerClass.isDeviceOpen == False:
+                self.connectedToMinix = False
+                self.tryingToConnectMinix = False
+                self.ConnectButton.config(text="Connection lost. Reconnect.", state="normal", bg="red")
+
+            elif self.controllerClass.newDataAvailable:
                 voltage = self.controllerClass.latestVoltage  # kV
                 current = self.controllerClass.latestCurrent  # µA
                 temperature = self.controllerClass.latestTemperature  # °C
@@ -405,16 +409,6 @@ class MainUI:
                 # Update UI with proper formatting
                 self.powerInfoBox.config(text=f"{power:.1f}")
                 self.temperatureInfoBox.config(text=f"{temperature:.1f}")
-                
-                # Update connection status
-                if self.controllerClass.isDeviceOpen and self.tryingToConnectMinix:
-                    self.connectedToMinix = True
-                    self.tryingToConnectMinix = False
-                    self.ConnectButton.config(text="Connected", state="normal", bg="green")
-            else:
-                # No new data, just check connection status
-                if self.controllerClass.isDeviceOpen:
-                    self.ConnectButton.config(text="Connected", state="normal", bg="green")
         else:
             if self.tryingToConnectMinix == True:
                 if self.debug:
