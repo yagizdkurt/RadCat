@@ -33,6 +33,7 @@ public:
     double readCurrent();
     double readTemperature();
     void testread();
+    void testread2();
 
 
 

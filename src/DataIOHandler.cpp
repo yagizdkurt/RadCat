@@ -530,6 +530,153 @@ void DIOHandler::testread(){
     Debug.Log("Basic device read test completed.");
 }
 
+void DIOHandler::testread2(){
+    Debug.Log("=== STARTING BASIC DEVICE TEST ===");
+    
+    // ✅ Test 1: Check if device handle is valid
+    if (ftHandle == NULL) {
+        Debug.Error("TEST FAILED: Device handle is NULL - device not opened");
+        return;
+    }
+    Debug.Log("TEST PASS: Device handle is valid");
+    
+    // ✅ Test 2: Check device status
+    DWORD modemStatus = 0;
+    FT_STATUS status = FT_GetModemStatus(ftHandle, &modemStatus);
+    if (status != FT_OK) {
+        Debug.Error("TEST FAILED: Cannot get device status - error: " + std::to_string(status));
+        return;
+    }
+    Debug.Log("TEST PASS: Device status readable, modem status = 0x" + 
+              std::string(1, "0123456789ABCDEF"[(modemStatus >> 4) & 0xF]) + 
+              std::string(1, "0123456789ABCDEF"[modemStatus & 0xF]));
+    
+    // ✅ Test 3: Check how many bytes are in receive queue
+    DWORD bytesInQueue = 0;
+    status = FT_GetQueueStatus(ftHandle, &bytesInQueue);
+    if (status != FT_OK) {
+        Debug.Error("TEST FAILED: Cannot check queue status - error: " + std::to_string(status));
+        return;
+    }
+    Debug.Log("TEST INFO: Bytes in receive queue = " + std::to_string(bytesInQueue));
+    
+    // ✅ Clear any existing data in the queue
+    if (bytesInQueue > 0) {
+        unsigned char clearBuffer[100];
+        DWORD bytesRead = 0;
+        FT_Read(ftHandle, clearBuffer, bytesInQueue > 100 ? 100 : bytesInQueue, &bytesRead);
+        Debug.Log("TEST INFO: Cleared " + std::to_string(bytesRead) + " old bytes from queue");
+    }
+    
+    // ✅ Test 4: Try the simplest possible write/read
+    unsigned char testByte = 0x80; // Send "Bad Command" - device should respond with 0xFA 0x80
+    DWORD bytesWritten = 0;
+    
+    status = FT_Write(ftHandle, &testByte, 1, &bytesWritten);
+    if (status != FT_OK) {
+        Debug.Error("TEST FAILED: Cannot write test byte - error: " + std::to_string(status));
+        return;
+    }
+    
+    if (bytesWritten != 1) {
+        Debug.Error("TEST FAILED: Expected to write 1 byte, actually wrote " + std::to_string(bytesWritten));
+        return;
+    }
+    Debug.Log("TEST PASS: Successfully wrote 1 test byte");
+    
+    // ✅ Test 5: Wait and check if device responded
+#ifdef _WIN32
+    Sleep(100); // Wait 100ms for response
+#else
+    usleep(100000);
+#endif
+    
+    status = FT_GetQueueStatus(ftHandle, &bytesInQueue);
+    if (status != FT_OK) {
+        Debug.Error("TEST FAILED: Cannot check queue after write - error: " + std::to_string(status));
+        return;
+    }
+    
+    Debug.Log("TEST INFO: After write, bytes in queue = " + std::to_string(bytesInQueue));
+    
+    if (bytesInQueue == 0) {
+        Debug.Error("TEST FAILED: Device did not respond to test command");
+        Debug.Log("This could mean:");
+        Debug.Log("  1. Device is not in MPSSE mode");
+        Debug.Log("  2. Device is not properly connected");
+        Debug.Log("  3. Wrong device type");
+        Debug.Log("  4. Hardware issue");
+        return;
+    }
+    
+    // ✅ Test 6: Read the response
+    unsigned char responseBuffer[10];
+    DWORD bytesRead = 0;
+    
+    status = FT_Read(ftHandle, responseBuffer, bytesInQueue, &bytesRead);
+    if (status != FT_OK) {
+        Debug.Error("TEST FAILED: Cannot read response - error: " + std::to_string(status));
+        return;
+    }
+    
+    Debug.Log("TEST SUCCESS: Read " + std::to_string(bytesRead) + " bytes from device");
+    
+    // ✅ Display the raw response data
+    std::string hexData = "Response data: ";
+    for (DWORD i = 0; i < bytesRead; i++) {
+        char hexByte[4];
+        sprintf(hexByte, "%02X ", responseBuffer[i]);
+        hexData += hexByte;
+    }
+    Debug.Log(hexData);
+    
+    // ✅ Check if we got expected "Bad Command" response
+    if (bytesRead >= 2 && responseBuffer[0] == 0xFA && responseBuffer[1] == 0x80) {
+        Debug.Log("TEST SUCCESS: Device responded correctly to bad command (0xFA 0x80)");
+        Debug.Log("=== DEVICE COMMUNICATION IS WORKING ===");
+        Debug.Log("Your FTDI device is properly connected and responding");
+        Debug.Log("The issue with temperature reading is likely in the protocol/timing");
+    } else if (bytesRead > 0) {
+        Debug.Log("TEST PARTIAL SUCCESS: Device is responding but not with expected bad command response");
+        Debug.Log("This might be OK - device could be in different mode or different firmware");
+        Debug.Log("At least basic communication is working");
+    } else {
+        Debug.Log("TEST WARNING: Got response but no readable data");
+    }
+    
+    // ✅ Test 7: Try a simple GPIO read (like your testread() function)
+    Debug.Log("TEST INFO: Attempting GPIO read test...");
+    
+    unsigned char gpioCmd = 0x81; // Read GPIO Low Byte
+    bytesWritten = 0;
+    
+    status = FT_Write(ftHandle, &gpioCmd, 1, &bytesWritten);
+    if (status == FT_OK && bytesWritten == 1) {
+#ifdef _WIN32
+        Sleep(50);
+#else
+        usleep(50000);
+#endif
+        
+        status = FT_GetQueueStatus(ftHandle, &bytesInQueue);
+        if (status == FT_OK && bytesInQueue > 0) {
+            unsigned char gpioData = 0;
+            status = FT_Read(ftHandle, &gpioData, 1, &bytesRead);
+            if (status == FT_OK && bytesRead == 1) {
+                Debug.Log("TEST SUCCESS: GPIO read returned: 0x" + 
+                          std::string(1, "0123456789ABCDEF"[gpioData >> 4]) + 
+                          std::string(1, "0123456789ABCDEF"[gpioData & 0xF]) + 
+                          " (decimal: " + std::to_string((int)gpioData) + ")");
+            }
+        }
+    }
+    
+    Debug.Log("=== BASIC DEVICE TEST COMPLETED ===");
+    Debug.Log("If you see 'DEVICE COMMUNICATION IS WORKING' above,");
+    Debug.Log("then your FTDI connection is good and the temperature");
+    Debug.Log("issue is in the sensor-specific protocol.");
+}
+
 # pragma region Minix Setup
 
 bool DIOHandler::initializeMiniX() {
