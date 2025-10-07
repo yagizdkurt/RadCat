@@ -112,7 +112,7 @@ void DIOHandler::connectMiniX(){
 
         // Check if description contains "Mini-X" or "AMPTEK"
         if (strstr(devInfo.Description, "Mini-X") != nullptr || 
-            strstr(devInfo.Description, "AMPTEK") != nullptr || std::stoul(devInfo.SerialNumber) > 1000000) { 
+            strstr(devInfo.Description, "AMPTEK") != nullptr || devInfo.ID == 67358808) { 
             Debug.Log("Found Mini-X device: " + std::string(devInfo.Description));
             // Store device information
             strncpy(m_minixSerialNumber, devInfo.SerialNumber, sizeof(m_minixSerialNumber));
