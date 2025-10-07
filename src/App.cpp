@@ -43,6 +43,18 @@ using namespace std;
 
     void Controller::logic(){
 
+        // Main logic loop
+        if(m_connectedToMinix){
+            readVoltage();
+            //readCurrent();
+            //readTemperature();
+            m_measurementCount++;
+            m_newDataAvailable = true;
+        }
+        else{
+            m_newDataAvailable = false;
+        }
+
     }
 
     void Controller::testButton(){
