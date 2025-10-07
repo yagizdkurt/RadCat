@@ -45,7 +45,7 @@ using namespace std;
 
         // Main logic loop
         if(m_connectedToMinix){
-            readVoltage();
+            //readVoltage();
             //readCurrent();
             //readTemperature();
             m_measurementCount++;

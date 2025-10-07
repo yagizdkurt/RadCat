@@ -67,6 +67,8 @@
 
 #pragma endregion
 
+//Serial number big= 1118880
+
 #pragma region minix device info
 
 // Mini-X Device Information Storage
@@ -330,9 +332,9 @@ double DIOHandler::readCurrent() {
 
     // Wait for conversion (longer for current reading)
 #ifdef _WIN32
-    Sleep(2000); // Windows Sleep in milliseconds (2 seconds)
+    Sleep(200); // Windows Sleep in milliseconds (200 milliseconds)
 #else
-    usleep(2000000); // Unix usleep in microseconds (2 seconds)
+    usleep(200000); // Unix usleep in microseconds (200 milliseconds)
 #endif
 
     // Read the reply
