@@ -373,60 +373,52 @@ double DIOHandler::readTemperature() {
 
     MinixUtilities::setClockDivisor(tx, pos);
     
-    // Start condition - take TS clock low
-    tx[pos++] = CMD_SET_DATA_BITS_LOWBYTE;
-    LowByteHiLowState &= ~CLKSTATE; // Take clock low
-    LowByteHiLowState &= ~DATASTATE; // Take data low
-    tx[pos++] = LowByteHiLowState;
-    tx[pos++] = OUTPUTMODE;
-
-    // Set TS chip select high
+ // ✅ Initialize high byte - Temperature sensor chip select
     tx[pos++] = CMD_SET_DATA_BITS_HIGHBYTE;
-    HighByteHiLowState |= TSCS; // Take chip select high
+    HighByteHiLowState &= ~TSCS; // Start with TS chip select LOW (inactive)
     tx[pos++] = HighByteHiLowState;
     tx[pos++] = OUTPUTMODE_H;
 
-    // Setup for temperature sensor communication
+    // ✅ Initialize low byte - Clock and data lines
     tx[pos++] = CMD_SET_DATA_BITS_LOWBYTE;
-    LowByteHiLowState &= ~CLKSTATE; // Take clock low
-    LowByteHiLowState &= ~DATASTATE; // Take data low
+    LowByteHiLowState |= CLKSTATE;  // Clock HIGH (idle state)
+    LowByteHiLowState |= DATASTATE; // Data HIGH (idle state)
     tx[pos++] = LowByteHiLowState;
     tx[pos++] = OUTPUTMODE;
 
+    // ✅ Activate temperature sensor - Take chip select HIGH
+    tx[pos++] = CMD_SET_DATA_BITS_HIGHBYTE;
+    HighByteHiLowState |= TSCS; // Take TS chip select HIGH (active)
+    tx[pos++] = HighByteHiLowState;
+    tx[pos++] = OUTPUTMODE_H;
+
+    // ✅ Small delay for sensor activation
     tx[pos++] = CMD_SET_DATA_BITS_LOWBYTE;
-    LowByteHiLowState &= ~CLKSTATE; // Take clock low
-    LowByteHiLowState &= ~DATASTATE; // Take data low
     tx[pos++] = LowByteHiLowState;
     tx[pos++] = OUTPUTMODE;
 
-    tx[pos++] = CMD_SET_DATA_BITS_LOWBYTE;
-    LowByteHiLowState |= CLKSTATE; // Take clock high
-    LowByteHiLowState &= ~DATASTATE; // Keep data low
-    tx[pos++] = LowByteHiLowState;
-    tx[pos++] = OUTPUTMODE;
-
-    // Send control address byte - clock out 8 bits
+    // ✅ Send temperature read command (0x01 for most temp sensors)
     tx[pos++] = CMD_CLOCK_OUT_BITS_MSB;
-    tx[pos++] = 0x07; // 7 = 8 bits
-    tx[pos++] = 0x01; // Temperature sensor command
+    tx[pos++] = 0x07; // 7 = 8 bits - 1
+    tx[pos++] = TSCMD; // Use defined temperature command (0xE0)
 
-    // Set data direction to input
+    // ✅ Switch to input mode to read data
     tx[pos++] = CMD_SET_DATA_BITS_LOWBYTE;
     tx[pos++] = LowByteHiLowState;
     tx[pos++] = INPUTMODE;
 
-    // Read 2 bytes from temperature sensor
+    // ✅ Read 2 bytes from temperature sensor
     tx[pos++] = CMD_CLOCK_IN_BYTES_MSB;
-    tx[pos++] = LENGTH_2_BYTES;
-    tx[pos++] = LENGTH_1_BYTE; // LengthH
+    tx[pos++] = LENGTH_2_BYTES;  // Read 2 bytes
+    tx[pos++] = LENGTH_1_BYTE;   // High byte = 0 (total = 2 bytes)
 
-    // Set TS chip select low
+    // ✅ Deactivate temperature sensor - Take chip select LOW
     tx[pos++] = CMD_SET_DATA_BITS_HIGHBYTE;
-    HighByteHiLowState &= ~TSCS; // Take chip select low
+    HighByteHiLowState &= ~TSCS; // Take TS chip select LOW (inactive)
     tx[pos++] = HighByteHiLowState;
     tx[pos++] = OUTPUTMODE_H;
 
-    // Send the command string
+    // ✅ Send the command string
     FT_STATUS status = FT_Write(ftHandle, tx, pos, &ret_bytes);
     if (status != FT_OK) {
         Debug.Error("Temperature sensor write command error: ", status);
