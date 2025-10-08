@@ -18,7 +18,7 @@ namespace Utilities {
     // Function declarations (implementations in utilities.cpp)
     DataValidationResult validateReceivedData(const unsigned char* data, size_t dataSize, const std::string& context = "Data");
     bool validateAndLogData(const unsigned char* data, size_t dataSize, const std::string& context = "Data");
-    
+    void sleepMs(int milliseconds);
     
     inline bool validate(const unsigned char* data, size_t dataSize) {
         auto result = validateReceivedData(data, dataSize);

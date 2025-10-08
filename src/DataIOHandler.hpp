@@ -24,7 +24,7 @@ public:
     
     // MiniX initialization and control methods
     bool initializeMiniX();
-    bool setupGPIOLines();
+    bool openMPSSE();
     bool setupTemperatureSensor();
     bool setClockDivisor();
     void setVoltage(double voltage);
@@ -33,7 +33,6 @@ public:
     double readCurrent();
     double readTemperature();
     void testread();
-    void testread2();
     void debugConnectionStatus();
 
 

@@ -1,4 +1,9 @@
 #include "utilities.hpp"
+#ifdef _WIN32
+    #include <windows.h>
+#else
+    #include <unistd.h>
+#endif
 
 namespace Utilities {
 
@@ -67,6 +72,14 @@ namespace Utilities {
         Debug.Log(context + " received: " + validation.hexData + " (checksum: " + checksumStream.str() + ")");
         
         return true;
+    }
+
+    void sleepMs(int milliseconds) {
+    #ifdef _WIN32
+        Sleep(milliseconds);
+    #else
+        usleep(milliseconds * 1000);
+    #endif
     }
 
 }

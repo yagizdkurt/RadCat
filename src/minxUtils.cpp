@@ -66,4 +66,16 @@ namespace MinixUtilities {
 
         return temperature;
     }
+
+    FT_STATUS Write(FT_HANDLE handle, const unsigned char* data, DWORD size, DWORD* bytesWritten) {
+        // Wrapper for FT_Write with logging
+        FT_STATUS status = FT_Write(handle, (LPVOID)data, size, bytesWritten);
+        if (status != FT_OK) {
+            Debug.Error("FT_Write failed with status: ", status);
+        } else {
+            Debug.Log("FT_Write succeeded, bytes written: " + std::to_string(*bytesWritten));
+        }
+        return status;
+    }
+
 }
