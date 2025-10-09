@@ -21,10 +21,10 @@ using namespace std;
         isRunning = false;
         if (LogicThread.joinable()) LogicThread.join();
         //End logic here
-
     }
 
     bool Controller::systemInitializor() {
+        Debug.debugLevel = 3; // Set debug level (0-3)
         bool CurrentStatus = true;
         Debug.Log("==================================");
         Debug.Log("System Initializing..");
@@ -59,7 +59,8 @@ using namespace std;
 
     void Controller::testButton(){
         Debug.Log("=== STARTING DEVICE DIAGNOSTICS ===");
-        dataHandler.testread();    // Then run the comprehensive test
+        pybind11::gil_scoped_release release;
+        dataHandler.readTemperature();    // Then run the comprehensive test
     }
 
 

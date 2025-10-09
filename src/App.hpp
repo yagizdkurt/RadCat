@@ -6,6 +6,7 @@
 #include <thread>
 #include <atomic>
 #include <memory>
+#include <pybind11/pybind11.h>
 #include "DataIOHandler.hpp"
 #include "TimeManager.hpp"
 #include "Debug.hpp"

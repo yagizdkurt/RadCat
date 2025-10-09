@@ -12,6 +12,8 @@ struct DebugClass {
         return instance;
     }
 
+    int debugLevel; // 0=none, 1=errors, 2=warnings, 3=info
+
     // ANSI color codes
     enum class Color { DEFAULT, RED, YELLOW, GREEN, CYAN, WHITE };
 
@@ -29,15 +31,15 @@ struct DebugClass {
     // Get current time as HH:MM:SS
     inline static std::string currentTime() {
         auto now = std::chrono::system_clock::now();
-        auto timeT = std::chrono::system_clock::to_time_t(now);
-        std::tm tmBuf;
-    #if defined(_WIN32) || defined(_WIN64)
-        localtime_s(&tmBuf, &timeT);
-    #else
-        localtime_r(&timeT, &tmBuf);
-    #endif
+        auto time_since_epoch = now.time_since_epoch();
+        auto hours = std::chrono::duration_cast<std::chrono::hours>(time_since_epoch) % 24;
+        auto minutes = std::chrono::duration_cast<std::chrono::minutes>(time_since_epoch) % 60;
+        auto seconds = std::chrono::duration_cast<std::chrono::seconds>(time_since_epoch) % 60;
+        
         std::ostringstream oss;
-        oss << std::put_time(&tmBuf, "%H:%M:%S");
+        oss << std::setfill('0') << std::setw(2) << hours.count() << ":"
+            << std::setfill('0') << std::setw(2) << minutes.count() << ":"
+            << std::setfill('0') << std::setw(2) << seconds.count();
         return oss.str();
     }
 
@@ -50,27 +52,30 @@ struct DebugClass {
     }
 
     // Logging functions
-    inline static void Log(const std::string& msg, int LinesBeforeMessage=1)    { print("[DEBUG]:", msg, Color::WHITE, false, LinesBeforeMessage); }
-    inline static void Warn(const std::string& msg, int LinesBeforeMessage=1)   { print("[WARNING]:", msg, Color::YELLOW, false, LinesBeforeMessage); }
-    inline static void Error(const std::string& msg, int LinesBeforeMessage=1)  { print("[ERROR]:", msg, Color::RED, true, LinesBeforeMessage); }
+    inline void Log(const std::string& msg, int LinesBeforeMessage=1)    { if(debugLevel >= 3) print("[DEBUG]:", msg, Color::WHITE, false, LinesBeforeMessage); }
+    inline void Warn(const std::string& msg, int LinesBeforeMessage=1)   { if(debugLevel >= 2) print("[WARNING]:", msg, Color::YELLOW, false, LinesBeforeMessage); }
+    inline void Error(const std::string& msg, int LinesBeforeMessage=1)  { if(debugLevel >= 1) print("[ERROR]:", msg, Color::RED, true, LinesBeforeMessage); }
 
     //Templated function for any type
     template<typename T>
-    inline static void Log(const std::string& prefix, const T& msg, int LinesBeforeMessage=1) {
+    inline void Log(const std::string& prefix, const T& msg, int LinesBeforeMessage=1) {
+        if (debugLevel < 3) return;
         std::ostringstream oss;
         oss << prefix << " " << msg;
         Log(oss.str(), LinesBeforeMessage);
     }
 
     template<typename T>
-    inline static void Warn(const std::string& prefix, const T& msg, int LinesBeforeMessage=1) {
+    inline void Warn(const std::string& prefix, const T& msg, int LinesBeforeMessage=1) {
+        if (debugLevel < 2) return;
         std::ostringstream oss;
         oss << prefix << " " << msg;
         Warn(oss.str(), LinesBeforeMessage);
     }
 
     template<typename T>
-    inline static void Error(const std::string& prefix, const T& msg, int LinesBeforeMessage=1) {
+    inline void Error(const std::string& prefix, const T& msg, int LinesBeforeMessage=1) {
+        if (debugLevel < 1) return;
         std::ostringstream oss;
         oss << prefix << " " << msg;
         Error(oss.str(), LinesBeforeMessage);

@@ -5,7 +5,9 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "C:/Users/WWW/AppData/Local/Programs/Python/Python39/Lib/site-packages/pybind11/include/pybind11",
-                "${workspaceFolder}/src"
+                "${workspaceFolder}/src",
+                "C:/Users/WWW/AppData/Local/Programs/Python/Python39/lib/site-packages/pybind11/include",
+                "C:/Users/WWW/AppData/Local/Programs/Python/Python39/include"
             ],
             "defines": [
                 "_DEBUG",

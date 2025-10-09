@@ -1,5 +1,6 @@
 #include "minxUtils.hpp"
-
+#include "utilities.hpp"
+using namespace std;
 namespace MinixUtilities {
 
     void setClockDivisor(unsigned char* tx, int& pos, int clockDivisor) {
@@ -67,15 +68,51 @@ namespace MinixUtilities {
         return temperature;
     }
 
-    FT_STATUS Write(FT_HANDLE handle, const unsigned char* data, DWORD size, DWORD* bytesWritten) {
-        // Wrapper for FT_Write with logging
-        FT_STATUS status = FT_Write(handle, (LPVOID)data, size, bytesWritten);
-        if (status != FT_OK) {
-            Debug.Error("FT_Write failed with status: ", status);
-        } else {
-            Debug.Log("FT_Write succeeded, bytes written: " + std::to_string(*bytesWritten));
-        }
-        return status;
+    void purgeBuffers(FT_HANDLE handle){ // Purge both RX and TX buffers
+        FT_STATUS status = FT_Purge(handle, FT_PURGE_RX | FT_PURGE_TX);
+        Utilities::sleepMs(20); // Small delay to ensure purge completes
+        Debug.Log("Purged RX and TX buffers.");
     }
+
+
+    // Temperature sensor control
+    void activateTemperatureSensor(unsigned char* tx, int& pos, unsigned char& HighByteHiLowState) {
+        // Activate temperature sensor by setting its chip select low
+        tx[pos++] = CMD_SET_DATA_BITS_HIGHBYTE;
+        CLEAR(HighByteHiLowState, TSCS);  // Set TSCS low to activate temperature sensor
+        tx[pos++] = HighByteHiLowState;
+        tx[pos++] = OUTPUTMODE_H;
+        Debug.Log("Activated temperature sensor (TSCS low).");
+    }
+
+    void deactivateTemperatureSensor(unsigned char* tx, int& pos, unsigned char& HighByteHiLowState) {
+        // Deactivate temperature sensor by setting its chip select high
+        tx[pos++] = CMD_SET_DATA_BITS_HIGHBYTE;
+        SET(HighByteHiLowState, TSCS);  // Set TSCS high to deactivate temperature sensor
+        tx[pos++] = HighByteHiLowState;
+        tx[pos++] = OUTPUTMODE_H;
+        Debug.Log("Deactivated temperature sensor (TSCS high).");
+    }
+
+    // FTD2 utility functions
+    bool pollData(FT_HANDLE handle, DWORD bytesToRead, DWORD& bytesRead, int timeoutMs) {
+        if(handle == nullptr || bytesToRead == 0) {Debug.Error("PollData: Invalid handle or bytesToRead."); return false;}
+        if(timeoutMs <= 0) {Debug.Error("PollData: timeout must be positive."); return false;}
+        DWORD rxBytes = 0; bytesRead = 0; int elapsed = 0; const int pollInterval = 20;
+        
+        while (bytesRead < bytesToRead && elapsed < timeoutMs) {
+            FT_GetQueueStatus(handle, &rxBytes);
+            if (rxBytes > 0) {
+                bytesRead = rxBytes;
+                if (bytesRead > bytesToRead) { bytesRead = bytesToRead; }
+            }
+            Utilities::sleepMs(pollInterval);
+            elapsed += pollInterval;
+        }
+        if (bytesRead < bytesToRead) { Debug.Warn("PollData: Timeout waiting for data. Requested: " + to_string(bytesToRead) +  ", Received: " + to_string(bytesRead)); return false; } 
+        else { Debug.Log("PollData: Successfully polled " + to_string(bytesRead) + " bytes of data."); return true; }
+    }
+
+
 
 }

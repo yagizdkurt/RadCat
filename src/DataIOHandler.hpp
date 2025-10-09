@@ -26,7 +26,7 @@ public:
     bool initializeMiniX();
     bool openMPSSE();
     bool setupTemperatureSensor();
-    bool setClockDivisor();
+    bool setupClockDivisor();
     void setVoltage(double voltage);
     void setCurrent(double current);
     double readVoltage();
@@ -34,8 +34,7 @@ public:
     double readTemperature();
     void testread();
     void debugConnectionStatus();
-
-
+    bool findMinixDevice();
 
     //Global Data Variables
     //FTDI D2XX
@@ -43,6 +42,13 @@ public:
     FT_STATUS ftStatus;
     DWORD bytesWritten;
     DWORD bytesRead;
+
+    // Mini-X Device Information Storage
+    char m_minixSerialNumber[16];      // Store serial number (stable identifier)
+    char m_minixDescription[64];       // Store device description
+    DWORD m_minixLocationId;           // Store location ID (USB port)
+    DWORD m_minixDeviceId;             // Store device/product ID
+    bool m_minixDeviceFound = false;   // Track if Mini-X was found
     bool m_isDeviceOpen = false;
     bool m_isMpsseOn = false;
     
@@ -51,23 +57,4 @@ public:
     unsigned char HighByteHiLowState;
     bool hvOn = false;
 
-
-    //UDP SOCKET
-    int udpSocket;
-    int udpSocketPort = 1030;
-    int socketBufferSize = 1000;
-    char *buffer = nullptr;
-
-
 };
-
-
-
-
-/*
-
-D2XX USB HANDLER
-FTDI CHİPSETLERİ İÇİN
-MİNİXML KÜTÜPHANESİ KULLANILACAK
-
-*/
