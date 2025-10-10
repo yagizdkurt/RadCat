@@ -1,6 +1,6 @@
 #pragma once
 #include "ftd2xx.h"
-#include <windows.h>
+#include "minixc.hpp"
 
 class Controller;
 
@@ -8,53 +8,25 @@ class DIOHandler {
     
 public:
     Controller* controller;
-    DIOHandler(Controller* ctrl) : controller(ctrl) {}
+    MinixController minixController;
+
+    DIOHandler(Controller* ctrl) : controller(ctrl) {
+        minixController.controller = ctrl;
+        minixController.DataHandler = this;
+    }
+
     ~DIOHandler() {}
 
     bool dataHandlerInit();
+
+    //Minix Interface Methods
     void connectMiniX();
     void disconnectMiniX();
 
-    bool openDevice(const char* serialNumber);
-    void closeDevice();
-    bool writeBytes(const unsigned char* data, DWORD length);
-    bool readBytes(unsigned char* buffer, DWORD length);
-    void tryConnect();
-    int getConnectedDevices();
-    
-    // MiniX initialization and control methods
-    bool initializeMiniX();
-    bool openMPSSE();
-    bool setupTemperatureSensor();
-    bool setupClockDivisor();
-    void setVoltage(double voltage);
-    void setCurrent(double current);
-    double readVoltage();
-    double readCurrent();
-    double readTemperature();
-    void testread();
-    void debugConnectionStatus();
-    bool findMinixDevice();
+    //IO Auto Logic
+    void deviceStatusChecks(float elapsedMS);
+    void minixAutoLogic(float elapsedMS);
+    float tempReadMS = 500.0; float tempReadPassed = 0.0;
 
-    //Global Data Variables
-    //FTDI D2XX
-    FT_HANDLE ftHandle;
-    FT_STATUS ftStatus;
-    DWORD bytesWritten;
-    DWORD bytesRead;
-
-    // Mini-X Device Information Storage
-    char m_minixSerialNumber[16];      // Store serial number (stable identifier)
-    char m_minixDescription[64];       // Store device description
-    DWORD m_minixLocationId;           // Store location ID (USB port)
-    DWORD m_minixDeviceId;             // Store device/product ID
-    bool m_minixDeviceFound = false;   // Track if Mini-X was found
-    bool m_isDeviceOpen = false;
-    bool m_isMpsseOn = false;
-    
-    // Hardware state variables
-    unsigned char LowByteHiLowState;
-    unsigned char HighByteHiLowState;
-    bool hvOn = false;
 
 };

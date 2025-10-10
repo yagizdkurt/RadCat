@@ -81,5 +81,7 @@ namespace MinixUtilities {
 
     // FTD2 utility functions
     bool pollData(FT_HANDLE handle, DWORD bytesToRead, DWORD& bytesRead, int timeoutMs = 250);
+    void LowByteIOSwitch(unsigned char* tx, int& pos, unsigned char& LowByteHiLowState, bool IO);
+    void HighByteIOSwitch(unsigned char* tx, int& pos, unsigned char& HighByteHiLowState, bool IO);
 }
 

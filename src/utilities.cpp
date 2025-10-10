@@ -55,17 +55,11 @@ namespace Utilities {
             return false;
         }
         
-        if (validation.hasSuspiciousPattern) {
-            Debug.Warn("Suspicious data: " + validation.message);
-        }
+        if (validation.hasSuspiciousPattern) Debug.Warn("Suspicious data: " + validation.message);
         
-        // Format checksum as hex string
-        std::ostringstream checksumStream;
-        checksumStream << "0x" << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)validation.checksum;
-        
-        // Log raw data and checksum
-        Debug.Log(context + " received: " + validation.hexData + " (checksum: " + checksumStream.str() + ")");
-        
+        // std::ostringstream checksumStream;
+        // checksumStream << "0x" << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << (int)validation.checksum;
+        // Debug.Log(context + " received: " + validation.hexData + " (checksum: " + checksumStream.str() + ")");
         return true;
     }
 

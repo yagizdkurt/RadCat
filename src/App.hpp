@@ -5,24 +5,24 @@
 #include <mutex>
 #include <thread>
 #include <atomic>
-#include <memory>
 #include <pybind11/pybind11.h>
-#include "DataIOHandler.hpp"
 #include "TimeManager.hpp"
 #include "Debug.hpp"
+#include "DataIOHandler.hpp"
 
 using namespace std;
+
 class Controller{
 private:
     mutex dataMutex;
     thread LogicThread;
-    unique_ptr<DIOHandler> dataHandler_ptr;
+    float elapsedMS = 0.0f;
 
 public:
     //Modules
-    DIOHandler& dataHandler;
+    DIOHandler dataHandler;
 
-    Controller() : dataHandler_ptr(std::make_unique<DIOHandler>(this)), dataHandler(*dataHandler_ptr)
+    Controller() : dataHandler(this)
     {
         if(systemInitializor()) run();
     }
@@ -34,12 +34,6 @@ public:
     void logic();
     void stop();
     bool systemInitializor();
-
-    //Data Call Methods
-    void readVoltage() { m_latestVoltage = dataHandler.readVoltage(); }
-    void readCurrent() { m_latestCurrent = dataHandler.readCurrent(); }
-    void readTemperature() { m_latestTemperature = dataHandler.readTemperature(); }
-
 
     // PYTHON INTERFACE METHODS
     void connectMiniX();

@@ -1,29 +1,7 @@
 #include "App.hpp"
 using namespace std;
 
-    void Controller::run(){
-        //Create and start the logic thread
-        LogicThread = thread([this]() {
-        while (isRunning) {
-
-            TimeM.timeUpdate();
-
-            logic();
-
-            this_thread::yield();
-        }
-
-        Debug.Log("App Stopped.");
-        });
-    }
-
-    void Controller::stop() {
-        isRunning = false;
-        if (LogicThread.joinable()) LogicThread.join();
-        //End logic here
-    }
-
-    bool Controller::systemInitializor() {
+bool Controller::systemInitializor() {
         Debug.debugLevel = 3; // Set debug level (0-3)
         bool CurrentStatus = true;
         Debug.Log("==================================");
@@ -41,32 +19,6 @@ using namespace std;
         return CurrentStatus;
     }
 
-    void Controller::logic(){
-
-        // Main logic loop
-        if(m_connectedToMinix){
-            //readVoltage();
-            //readCurrent();
-            //readTemperature();
-            m_measurementCount++;
-            m_newDataAvailable = true;
-        }
-        else{
-            m_newDataAvailable = false;
-        }
-
-    }
-
-    void Controller::testButton(){
-        Debug.Log("=== STARTING DEVICE DIAGNOSTICS ===");
-        pybind11::gil_scoped_release release;
-        dataHandler.readTemperature();    // Then run the comprehensive test
-    }
-
-
-
-
-
 // PYTHON INTERFACE METHODS
 #pragma region: PYTHON METHODS ----
 
@@ -74,4 +26,39 @@ using namespace std;
 
     void Controller::disconnectMiniX(){dataHandler.disconnectMiniX();}
 
+    void Controller::testButton(){
+        Debug.Log("=== STARTING DEVICE DIAGNOSTICS ===");
+        pybind11::gil_scoped_release release;
+        dataHandler.minixController.readCurrent();    // Then run the comprehensive test
+    }
+
 #pragma endregion: PYTHON METHODS ----
+
+#pragma region: THREAD METHODS ----
+
+void Controller::run(){
+    pybind11::gil_scoped_release release;
+        //Create and start the logic thread
+        LogicThread = thread([this]() {
+        while (isRunning) {
+            logic();
+            std::this_thread::sleep_for(10ms);
+        }
+        Debug.Log("App Stopped.");
+        });
+    }
+
+
+void Controller::stop() {
+        isRunning = false;
+        if (LogicThread.joinable()) LogicThread.join();
+        //End logic here
+        dataHandler.disconnectMiniX();
+    }
+
+void Controller::logic(){
+            elapsedMS = TimeM.elapsedMS();
+            dataHandler.deviceStatusChecks(elapsedMS);
+    }
+
+#pragma endregion: THREAD METHODS ----
