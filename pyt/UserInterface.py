@@ -176,10 +176,10 @@ class MainUI:
         self.currentChannel = self.channelSelector.get()
 
     def OnHighVoltageChange(self, *args):
-        self.highVoltageVar = self.HighVoltageSelector.get()
+        self.setHighVoltageVar = self.HighVoltageSelector.get()
 
     def OnCurrentChange(self, *args):
-        self.currentVar = self.CurrentSelector.get()
+        self.setCurrentVar = self.CurrentSelector.get()
 
     def OnPressConnectMinix(self, *args):
         return
@@ -274,6 +274,11 @@ class MainUI:
         self.CurrentSelector.place(x=125, y=45)
         self.CurrentSelector.set(currentstartingvalue)
 
+        self.voltageSetButton = tk.Button(xRayTab, text = "Set HV", font = self.defaultFont1s, command = self.OnHighVoltageSet)
+        self.voltageSetButton.place(x=250, y=10)
+        self.currentSetButton = tk.Button(xRayTab, text = "Set C  ", font = self.defaultFont1s, command = self.OnCurrentSet)
+        self.currentSetButton.place(x=250, y=45)
+
         #Power and Temperature
         powertext = tk.Label(xRayTab, text = "Power", font = self.defaultFont1s)
         powertext.place(x=10, y=90)
@@ -296,8 +301,8 @@ class MainUI:
         self.HVONButton.place(x=20 , y= 220)
         self.HVOFFButton = tk.Button(xRayTab, text = "Voltage OFF", font = ("Arial",15,"bold"), bg = "red", command = self.OnPressVoltageOff)
         self.HVOFFButton.place(x=150, y=220)
-        self.testButton = tk.Button(xRayTab, text = "Test", font = ("Arial",15,"bold"), bg = "yellow", command = self.UItestButton)
-        self.testButton.place(x=100, y=270)
+        self.testButton = tk.Button(xRayTab, text = "Test", font = ("Arial",20,"bold"), bg = "yellow", command = self.UItestButton)
+        self.testButton.place(x=235, y=90)
 
         #endregion
 
@@ -353,12 +358,15 @@ class MainUI:
 # region: ---- Wrapper Functions ----
 
     def OnPressConnectMinix(self):
-        if self.controllerClass is not None:
-            self.controllerClass.connectMiniX()
-            self.tryingToConnectMinix = True
-            self.minixDeviceFound = False
-            self.connectedToMinix = False
-            self.ConnectButton.config(text = "Trying to find Mini-X...", state = "disabled", bg="yellow")
+        if self.controllerClass is None:
+            self.window.after(500, self.CheckConnectionToMinixSetup)
+            return
+        
+        self.controllerClass.connectMiniX()
+        self.tryingToConnectMinix = True
+        self.minixDeviceFound = False
+        self.connectedToMinix = False
+        self.ConnectButton.config(text = "Trying to find Mini-X...", state = "disabled", bg="yellow")
         self.window.after(500, self.CheckConnectionToMinixSetup)
 
     def CheckConnectionToMinixSetup(self):
@@ -385,8 +393,22 @@ class MainUI:
             self.ConnectButton.config(text="Device Opened. Initializing...", state="disabled", bg="yellow")
             self.window.after(500, self.CheckConnectionToMinixSetup)
             return
-
         
+    def OnHighVoltageSet(self):
+        if self.controllerClass is None:
+            print("BIG ERROR: Controller class not linked to UI")
+            return
+        self.controllerClass.setTargetVoltage(float(self.setHighVoltageVar))
+        if self.connectedToMinix == True:
+            self.controllerClass.setTargetVoltage(float(self.setHighVoltageVar))
+
+    def OnCurrentSet(self):
+        if self.controllerClass is None:
+            print("BIG ERROR: Controller class not linked to UI")
+            return
+        self.controllerClass.setTargetCurrent(float(self.setCurrentVar))
+        if self.connectedToMinix == True:
+            self.controllerClass.setTargetCurrent(float(self.setCurrentVar))
 
     def TryFetchingDataMiniX(self):
         if self.controllerClass is None:
@@ -421,3 +443,9 @@ class MainUI:
 
 
 # endregion
+
+
+if __name__ == "__main__":
+    ui = MainUI()
+    ui.starter()
+    ui.window.mainloop()

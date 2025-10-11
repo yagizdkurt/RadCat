@@ -12,6 +12,8 @@ PYBIND11_MODULE(YDYTU1_py, m) {
         .def("connectMiniX", &Controller::connectMiniX)
         .def("testButton", &Controller::testButton)
         .def("disconnectMiniX", &Controller::disconnectMiniX)
+        .def("setTargetVoltage", [](Controller& c, double voltage) {c.m_targetMinixVoltage.store(voltage);})
+        .def("setTargetCurrent", [](Controller& c, double current) {c.m_targetMinixCurrent.store(current);})
 
         // Read-only properties for Setup and config data
         .def_property_readonly("minixDeviceFound", [](const Controller& c) { return c.m_minixDeviceFound.load(); })
@@ -22,9 +24,9 @@ PYBIND11_MODULE(YDYTU1_py, m) {
 
         // Read-only properties for atomic variables
         .def_property_readonly("isRunning", [](const Controller& c) { return c.isRunning.load(); })
-        .def_property_readonly("latestVoltage", [](const Controller& c) { return c.m_latestVoltage.load(); })
-        .def_property_readonly("latestCurrent", [](const Controller& c) { return c.m_latestCurrent.load(); })
-        .def_property_readonly("latestTemperature", [](const Controller& c) { return c.m_latestTemperature.load(); })
+        .def_property_readonly("latestVoltage", [](const Controller& c) { return c.m_latestMinixVoltage.load(); })
+        .def_property_readonly("latestCurrent", [](const Controller& c) { return c.m_latestMinixCurrent.load(); })
+        .def_property_readonly("latestTemperature", [](const Controller& c) { return c.m_latestMinixTemperature.load(); })
         .def_property_readonly("newDataAvailable", [](const Controller& c) { return c.m_newDataAvailable.load(); })
         .def_property_readonly("measurementCount", [](const Controller& c) { return c.m_measurementCount.load(); });
 }

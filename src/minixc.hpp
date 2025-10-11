@@ -25,6 +25,7 @@ public:
     double readVoltage();
     double readCurrent();
     double readTemperature();
+    bool safetyChecks();
 
 private:
     // Minix Setup and close Methods
@@ -36,6 +37,12 @@ private:
     bool closeDevice();
     bool setupTemperatureSensor();
     bool setupClockDivisor();
+    void purgeMinixInfo();
+
+    // Minix Checks
+    bool connectionChecks();
+
+
     // Minix Control Methods
     void setVoltage(double voltage);
     void setCurrent(double current);

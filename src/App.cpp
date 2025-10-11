@@ -29,7 +29,8 @@ bool Controller::systemInitializor() {
     void Controller::testButton(){
         Debug.Log("=== STARTING DEVICE DIAGNOSTICS ===");
         pybind11::gil_scoped_release release;
-        dataHandler.minixController.readCurrent();    // Then run the comprehensive test
+        Debug.Log("Set Voltage = " + std::to_string(m_targetMinixVoltage.load()) + " kV");
+        Debug.Log("Set Current = " + std::to_string(m_targetMinixCurrent.load()) + " uA");
     }
 
 #pragma endregion: PYTHON METHODS ----

@@ -26,7 +26,7 @@ public:
     //IO Auto Logic
     void deviceStatusChecks(float elapsedMS);
     void minixAutoLogic(float elapsedMS);
-    float tempReadMS = 500.0; float tempReadPassed = 0.0;
+    float tempReadPassed = 0.0; float minixSafetyCheckPassed = 0.0;
 
 
 };

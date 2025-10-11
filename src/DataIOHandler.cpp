@@ -23,7 +23,8 @@ void DIOHandler::connectMiniX() {
 }
 
 void DIOHandler::disconnectMiniX() {
-    if(minixController.disconnectMiniX()){
+    if(!controller->m_connectedToMinix) return;
+    else if(minixController.disconnectMiniX()){
         Debug.Log("Disconnected from MiniX successfully.");
     } else {
         Debug.Error("Failed to disconnect from MiniX.");
@@ -31,12 +32,18 @@ void DIOHandler::disconnectMiniX() {
 }
 
 void DIOHandler::minixAutoLogic(float elapsedMS){
+    minixSafetyCheckPassed += elapsedMS;
+    if(minixSafetyCheckPassed >= 250.0){
+        minixSafetyCheckPassed = 0.0;
+        if(!minixController.safetyChecks()) return;
+    }
+
     tempReadPassed += elapsedMS;
-    if(tempReadPassed >= tempReadMS){
+    if(tempReadPassed >= 500.0){
         tempReadPassed = 0.0;
         // Read temperature
-        controller ->m_latestTemperature = minixController.readTemperature();
-        // Debug.Log("Temperature: " + std::to_string(controller->m_latestTemperature) + " C");
+        controller ->m_latestMinixTemperature = minixController.readTemperature();
+        // Debug.Log("Temperature: " + std::to_string(controller->m_latestMinixTemperature) + " C");
         controller ->m_newDataAvailable = true;
     }
 }

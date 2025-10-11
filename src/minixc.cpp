@@ -276,10 +276,32 @@ void MinixController::testread(){
     Debug.Log("=== MPSSE MODE TEST COMPLETED ===");
 }
 
+bool MinixController::connectionChecks(){
+    DWORD rxBytes = 0, txBytes = 0, eventStatus = 0;
+    FT_STATUS ftStatus = FT_GetStatus(ftHandle, &rxBytes, &txBytes, &eventStatus);
+    if (ftStatus != FT_OK) {Debug.Error("Status check failed. Probably device lost connection or out of power."); return false;}
+    return true;
+}
+
 #pragma endregion
 
-
-
+void MinixController::purgeMinixInfo() {
+    if constexpr (minixDebug) Debug.Log("Purging MiniX information...");
+    memset(minixSerialNumber, 0, sizeof(minixSerialNumber));
+    memset(minixDescription, 0, sizeof(minixDescription));
+    minixLocationId = 0;
+    minixDeviceId = 0;
+    controller->m_minixDeviceFound = false;
+    isDeviceOpen = false;
+    isMpsseOn = false;
+    FT_Close(ftHandle);
+    ftHandle = nullptr;
+    controller->m_connectedToMinix = false;
+    controller->m_isMpsseOn = false;
+    controller->m_minixOpened = false;
+    controller->m_minixDeviceFound = false;
+    controller->m_tryingToConnectMinix = false;
+}
 
 #pragma region Minix Write Methods
 
@@ -302,8 +324,8 @@ void MinixController::setCurrent(double current) {
 
 bool MinixController::disconnectMiniX(){
     if constexpr (minixDebug) Debug.Log("Disconnecting from MiniX...");
-    closeDevice();
-    return true;
+    if(closeDevice()) return true;
+    return false;
 }
 
 bool MinixController::closeDevice() {
@@ -573,6 +595,17 @@ bool MinixController::connectMiniX(){
     return true;
 }
 
+bool MinixController::safetyChecks(){
+    if(!connectionChecks()){ Debug.Error("Connection checks failed.");
+        purgeMinixInfo();
+        return false;
+    }
+
+    
+
+
+    return true;
+}
 #pragma endregion
 
 

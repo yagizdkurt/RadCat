@@ -4,10 +4,9 @@ using namespace std;
 namespace MinixUtilities {
 
     void setClockDivisor(unsigned char* tx, int& pos, int clockDivisor) {
-        tx[pos++] = CMD_SET_CLK_DIVISOR;    // Set CLK divisor command
-        tx[pos++] = clockDivisor & 0xFF;           // CLK divisor value (low byte)
-        tx[pos++] = (clockDivisor >> 8) & 0xFF;    // CLK divisor high byte
-        Debug.Log("Set clock divisor to: 1/" + std::to_string(clockDivisor));
+        tx[pos++] = CMD_SET_CLK_DIVISOR;
+        tx[pos++] = clockDivisor & 0xFF;
+        tx[pos++] = (clockDivisor >> 8) & 0xFF;
     }
 
     double convertToVoltage(unsigned char rx0, unsigned char rx1, double VRef, double DAC_ADC_Scale, double HighVoltageConversionFactor) {
@@ -51,10 +50,10 @@ namespace MinixUtilities {
         return temperature;
     }
 
-    void purgeBuffers(FT_HANDLE handle){ // Purge both RX and TX buffers
+    void purgeBuffers(FT_HANDLE handle){
         FT_STATUS status = FT_Purge(handle, FT_PURGE_RX | FT_PURGE_TX);
-        Utilities::sleepMs(20); // Small delay to ensure purge completes
-        Debug.Log("Purged RX and TX buffers.");
+        Utilities::sleepMs(20);
+        // Debug.Log("Purged RX and TX buffers.");
     }
 
     void activateTemperatureSensor(unsigned char* tx, int& pos, unsigned char& HighByteHiLowState) {
