@@ -4,10 +4,10 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:/Users/WWW/AppData/Local/Programs/Python/Python39/Lib/site-packages/pybind11/include/pybind11",
                 "${workspaceFolder}/src",
-                "C:/Users/WWW/AppData/Local/Programs/Python/Python39/lib/site-packages/pybind11/include",
-                "C:/Users/WWW/AppData/Local/Programs/Python/Python39/include"
+                "F:/payton13",
+                "F:/payton13/lib/site-packages/pybind11/include",
+                "F:/payton13/include"
             ],
             "defines": [
                 "_DEBUG",

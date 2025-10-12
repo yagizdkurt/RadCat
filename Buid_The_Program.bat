@@ -39,7 +39,19 @@ rmdir /s /q %TEMP_BUILD%
 
 for /l %%i in (1,1,10) do echo.
 echo Module built complete. Making Executable.
-pyinstaller MyProgram.spec
+
+REM Get Python executable path and derive Scripts directory
+for /f "delims=" %%i in ('python -c "import sys; print(sys.executable)"') do set PYTHON_PATH=%%i
+for %%i in ("%PYTHON_PATH%") do set PYTHON_DIR=%%~dpi
+set SCRIPTS_DIR=%PYTHON_DIR%Scripts
+
+echo Using PyInstaller from: %SCRIPTS_DIR%
+"%SCRIPTS_DIR%\pyinstaller.exe" MyProgram.spec
+
+if %errorlevel% neq 0 (
+    echo PyInstaller failed, trying alternative method...
+    python -m PyInstaller MyProgram.spec
+)
 
 REM rmdir /s /q build
 

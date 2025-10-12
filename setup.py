@@ -9,9 +9,9 @@ cpp_sources = [str(p) for p in src_dir.glob("*.cpp")]
 
 extra_compile_args = []
 if sys.platform == "win32":
-    extra_compile_args = ["/std:c++20"]  # MSVC syntax
+    extra_compile_args = ["/std:c++20","/DNOMINMAX"]  # MSVC syntax
 else:
-    extra_compile_args = ["-std=c++20"]  # GCC/Clang syntax
+    extra_compile_args = ["-std=c++20","-DNOMINMAX"]  # GCC/Clang syntax
 
 ext_modules = [
     Extension(
