@@ -9,6 +9,7 @@ class MainUI:
     def defineVariables(self):
         self.debug = False
         self.controllerClass = None
+        self.cpp = None
         self.tryingToConnectMinix = False
         self.connectedToMinix = False
 
@@ -192,7 +193,7 @@ class MainUI:
     
     def UItestButton(self):
         if self.controllerClass is not None:
-            self.controllerClass.testButton()
+            self.cpp.testButton()
 
 
 
@@ -362,7 +363,7 @@ class MainUI:
             self.window.after(500, self.CheckConnectionToMinixSetup)
             return
         
-        self.controllerClass.connectMiniX()
+        self.cpp.connectMiniX()
         self.tryingToConnectMinix = True
         self.minixDeviceFound = False
         self.connectedToMinix = False
@@ -398,17 +399,17 @@ class MainUI:
         if self.controllerClass is None:
             print("BIG ERROR: Controller class not linked to UI")
             return
-        self.controllerClass.setTargetVoltage(float(self.setHighVoltageVar))
+        
         if self.connectedToMinix == True:
-            self.controllerClass.setTargetVoltage(float(self.setHighVoltageVar))
+            self.cpp.setTargetVoltage(float(self.setHighVoltageVar))
 
     def OnCurrentSet(self):
         if self.controllerClass is None:
             print("BIG ERROR: Controller class not linked to UI")
             return
-        self.controllerClass.setTargetCurrent(float(self.setCurrentVar))
+        
         if self.connectedToMinix == True:
-            self.controllerClass.setTargetCurrent(float(self.setCurrentVar))
+            self.cpp.setTargetCurrent(float(self.setCurrentVar))
 
     def TryFetchingDataMiniX(self):
         if self.controllerClass is None:

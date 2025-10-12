@@ -5,7 +5,9 @@ import sys
 
 src_dir = Path(__file__).parent / "src"
 libs_dir = src_dir / "libs"
-cpp_sources = [str(p) for p in src_dir.glob("*.cpp")]
+# Exclude DP5 files that require LibUSB for now
+excluded_files = ["DPHandler.cpp", "DP5_Usage_Example.cpp"]
+cpp_sources = [str(p) for p in src_dir.glob("*.cpp") if p.name not in excluded_files]
 
 extra_compile_args = []
 if sys.platform == "win32":

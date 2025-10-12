@@ -5,10 +5,13 @@
 #include <mutex>
 #include <thread>
 #include <atomic>
+#include <queue>
+#include <functional>
 #include <pybind11/pybind11.h>
 #include "TimeManager.hpp"
 #include "Debug.hpp"
 #include "DataIOHandler.hpp"
+#include "pyManager.hpp"
 
 using namespace std;
 
@@ -18,11 +21,16 @@ private:
     thread LogicThread;
     float elapsedMS = 0.0f;
 
+    std::queue<std::function<void()>> m_taskQueue;
+    std::mutex m_taskMutex;
+
 public:
     //Modules
     DIOHandler dataHandler;
+    PyManager pyManager;
+    PyManager& getPyManager() { return pyManager; }
 
-    Controller() : dataHandler(this) { if(systemInitializor()) run(); }
+    Controller() : dataHandler(this), pyManager(this) { if(systemInitializor()) run(); }
     ~Controller(){}
 
     //Main Methods
@@ -31,12 +39,11 @@ public:
     void stop();
     bool systemInitializor();
 
-    // PYTHON INTERFACE METHODS
-    void connectMiniX();
-    void disconnectMiniX();
-    void testButton();
+    // Task queue methods
+    void queueTask(std::function<void()> task);
+    void processQueuedTasks();
 
-    // ----- SHARED DATA -----
+    // ----- THREAD SHARED DATA -----
 
     // Shared Minix Data
     atomic<double> m_latestMinixVoltage{0.0};
@@ -48,9 +55,6 @@ public:
     atomic<bool> m_tryingToConnectMinix{false};
     atomic<bool> m_minixOpened{false};
     atomic<bool> m_connectedToMinix{false};
-
-
-
 
     atomic<uint64_t> m_lastUpdateTimestamp{0};
     atomic<bool> m_newDataAvailable{false};

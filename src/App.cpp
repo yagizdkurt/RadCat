@@ -19,22 +19,6 @@ bool Controller::systemInitializor() {
         return CurrentStatus;
     }
 
-// PYTHON INTERFACE METHODS
-#pragma region: PYTHON METHODS ----
-
-    void Controller::connectMiniX(){dataHandler.connectMiniX();}
-
-    void Controller::disconnectMiniX(){dataHandler.disconnectMiniX();}
-
-    void Controller::testButton(){
-        Debug.Log("=== STARTING DEVICE DIAGNOSTICS ===");
-        pybind11::gil_scoped_release release;
-        Debug.Log("Set Voltage = " + std::to_string(m_targetMinixVoltage.load()) + " kV");
-        Debug.Log("Set Current = " + std::to_string(m_targetMinixCurrent.load()) + " uA");
-    }
-
-#pragma endregion: PYTHON METHODS ----
-
 #pragma region: THREAD METHODS ----
 
 void Controller::run(){
@@ -59,7 +43,39 @@ void Controller::stop() {
 
 void Controller::logic(){
             elapsedMS = TimeM.elapsedMS();
+            
+            // Continue with normal logic
             dataHandler.deviceStatusChecks(elapsedMS);
-    }
+
+            // Process any queued tasks from Python
+            processQueuedTasks();
+        }
 
 #pragma endregion: THREAD METHODS ----
+
+#pragma region: TASK QUEUE METHODS ----
+
+void Controller::queueTask(std::function<void()> task) {
+    std::lock_guard<std::mutex> lock(m_taskMutex);
+    m_taskQueue.push(task);
+}
+
+void Controller::processQueuedTasks() {
+    std::unique_lock<std::mutex> lock(m_taskMutex);
+
+    while (!m_taskQueue.empty()) {
+        auto task = m_taskQueue.front();
+        m_taskQueue.pop();
+        
+        // Temporarily unlock mutex while executing task
+        lock.unlock();
+        try {
+            task();  // Execute the task
+        } catch (const std::exception& e) {
+            Debug.Error("Task execution failed: " + std::string(e.what()));
+        }
+        lock.lock();  // Re-lock for next iteration
+    }
+}
+
+#pragma endregion: TASK QUEUE METHODS ----

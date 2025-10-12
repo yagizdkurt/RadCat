@@ -33,6 +33,9 @@ Bit 7 (0x80): [Unused/Reserved]
 #define  SET(x, y)   ((x) |= (y)) 
 #define  CLEAR(x, y)   ((x) &= (~y)) 
 
+#define CLK_FN_NEG 0x10     //Clock out 2 bytes on negative edge, MSB first
+#define CLK_FN CLK_FN_NEG
+
 // MPSSE Commands
 #define CMD_SET_DATA_BITS_LOWBYTE   0x80    // Set Data Bits Low Byte
 #define CMD_SET_DATA_BITS_HIGHBYTE  0x82    // Set Data Bits High Byte
@@ -306,13 +309,131 @@ void MinixController::purgeMinixInfo() {
 #pragma region Minix Write Methods
 
 void MinixController::setVoltage(double voltage) {
-    // Voltage setting implementation - placeholder TODO: Add actual voltage setting code
-    Debug.Log("Setting voltage to: " + std::to_string(voltage) + " kV");
+    unsigned char tx[100]; FT_STATUS status; DWORD ret_bytes;
+
+    if (hvOn) 
+    {
+        if ((voltage > HighVoltageMax) || (voltage < HighVoltageMin))
+        {
+        printf("voltage outside limits\n");
+        return;
+        }
+    }
+
+    if (voltage * currentuA > SafeWattageMW) { Debug.Error("SetVoltage: Power too high, not setting voltage."); return; }
+
+    voltagekV = voltage;
+    voltage += 0.00001;
+    voltage /= HighVoltageConversionFactor; // convert from hv to adc volts
+
+    int iVolts = (int)(voltage / VRef * DAC_ADC_Scale);
+    unsigned char bhi, blo;
+
+    //01111111 11110000
+    bhi = (iVolts & 0x0ff0) >> 4;
+    blo = (iVolts & 0x0f) << 4;
+
+    //take DACS low and clock 2 bytes of data into the DAC
+    int pos=0;
+    tx[pos++] = 0x80;//Setup MPSSE Low byte I/O lines
+    CLEAR(LowByteHiLowState, DACS);//take DACS low
+    //CLEAR(LowByteHiLowState, CLKSTATE);//take CLock low
+    SET(LowByteHiLowState, CLKSTATE);//take CLock low
+    tx[pos++] = LowByteHiLowState;
+    tx[pos++] = OUTPUTMODE;
+    
+    tx[pos++] = CLK_FN;   //Clock out 2 bytes on positive edge, MSB first
+    tx[pos++] = 0x02;//LengthL 0=1byte, 1=2bytes
+    tx[pos++] = 0x00;//LengthH  
+    tx[pos++] = DACA;
+    tx[pos++] = bhi;
+    tx[pos++] = blo;
+
+    //take DACS back high
+    tx[pos++] = 0x80;//Setup MPSSE Low byte I/O lines
+    SET(LowByteHiLowState, DACS);//take DACS high
+    tx[pos++] = LowByteHiLowState;
+    tx[pos++] = OUTPUTMODE;
+
+    status = FT_Write(ftHandle, tx, pos, &ret_bytes);
+    if(status != FT_OK) { Debug.Error("SetVoltage: Error writing to device."); HVSetErr = true; return; }
 }
 
-void MinixController::setCurrent(double current) {
-    // Current setting implementation - placeholder TODO: Add actual current setting code
-    Debug.Log("Setting current to: " + std::to_string(current) + " uA");
+void MinixController::setCurrent(double voltage) {
+    unsigned char tx[100]; FT_STATUS status; DWORD ret_bytes;
+
+    if (hvOn)
+    {
+        if ((voltage > CurrentMax) || (voltage < CurrentMin))
+        {
+        printf("current outside limits\n");
+        return;
+        }
+    }
+
+    if (voltagekV * voltage > SafeWattageMW)  Debug.Error("SetCurrent: Power too high, not setting current."); return;
+
+    currentuA = voltage;
+    voltage += 0.00001;
+    voltage /= CurrentConversionFactor;  // convert from hv to adc volts
+
+    int iVolts = (int)(voltage / VRef * DAC_ADC_Scale);
+    unsigned char bhi, blo;
+
+    //01111111 11110000
+    bhi = ((iVolts & 0x0ff0) >> 4);
+    blo = ((iVolts & 0x0f) << 4);
+
+    //take DACS low and clock 2 bytes of data into the DAC
+    int pos=0;
+    tx[pos++] = 0x80;//Setup MPSSE Low byte I/O lines
+    CLEAR(LowByteHiLowState, DACS);//take DACS low
+    //CLEAR(LowByteHiLowState, CLKSTATE);//take CLock low
+    SET(LowByteHiLowState, CLKSTATE);//take CLock low
+    tx[pos++] = LowByteHiLowState;
+    tx[pos++] = OUTPUTMODE;
+    
+    tx[pos++] = CLK_FN;   //Clock out 2 bytes on positive edge, MSB first
+    tx[pos++] = 0x02;//LengthL 0=1byte, 1=2bytes
+    tx[pos++] = 0x00;//LengthH  
+    tx[pos++] = DACB;
+    tx[pos++] = bhi;
+    tx[pos++] = blo;
+
+    //take DACS back high
+    tx[pos++] = 0x80;//Setup MPSSE Low byte I/O lines
+    SET(LowByteHiLowState, DACS);//take DACS high
+    tx[pos++] = LowByteHiLowState;
+    tx[pos++] = OUTPUTMODE;
+
+    status = FT_Write(ftHandle, tx, pos, &ret_bytes);
+    if(status != FT_OK){ Debug.Error("SetCurrent: Error writing to device."); CurrentSetErr = true; }
+}
+
+void MinixController::setHVOnOff(bool on) {
+    unsigned char tx[6]; DWORD ret_bytes; int pos=0; FT_STATUS status;
+
+    if(on){
+        tx[pos++] = 0x80;//Setup MPSSE Low byte I/O lines
+        SET(LowByteHiLowState, CTRL_HV_EN_A); //HVEN A enabled
+        SET(LowByteHiLowState, CTRL_HV_EN_B); //HVEN B enabled
+        tx[pos++] = LowByteHiLowState;
+        tx[pos++] = OUTPUTMODE;
+    }else{
+        tx[pos++] = 0x80;//Setup MPSSE Low byte I/O lines
+        CLEAR(LowByteHiLowState, CTRL_HV_EN_A); //HVEN A disabled
+        CLEAR(LowByteHiLowState, CTRL_HV_EN_B); //HVEN B disabled
+        tx[pos++] = LowByteHiLowState;
+        tx[pos++] = OUTPUTMODE;
+        setVoltage(0.0);
+        sleepMs(1000);
+        setCurrent(0.0);
+        sleepMs(1000);
+    }
+
+    status = FT_Write(ftHandle, tx, pos, &ret_bytes);
+    if(status != FT_OK) { Debug.Error("SetHVOnOff: Error writing to device."); HVOffErr = true; return; }
+    hvOn = on;
 }
 
 #pragma endregion
@@ -339,6 +460,22 @@ bool MinixController::closeDevice() {
         if constexpr (minixDebug) Debug.Log("No device is open.");
     }
     return true;
+}
+
+void MinixController::SetParametersToDefault() {
+    DefaultHighVoltage = 15.0;          // Default High Voltage kV
+    HighVoltageMin = (double)9.999999;  // High Voltage Min
+    HighVoltageMax = 40.0;            // High Voltage Max
+    HighVoltageConversionFactor = 10.0;     // High Voltage Conversion Factor
+    DefaultCurrent = 15.0;              // Default Current
+    CurrentMin = (double)4.999999;
+    CurrentMax = 200.0;             // Current Max
+    CurrentConversionFactor = 50.0;       // Current Conversion Factor
+    VRef = 4.096;           // Reference Voltage 
+    DAC_ADC_Scale = 4096;           // DAC ADC Scale 
+    WattageMax = 4.00;              // Wattage Max 
+    SafetyMargin = 0.050;       // Safety Margin
+    SafeWattageMW = (double)((WattageMax - SafetyMargin) * 1000.0);
 }
 
 int MinixController::getConnectedDevices() {
@@ -400,15 +537,14 @@ bool MinixController::findMinixDevice(){
 }
 
 bool MinixController::initializeMiniX() {
-    // Step 4: Setup temperature sensor
+    SetParametersToDefault();
+
     if (!setupTemperatureSensor()) { Debug.Error("Failed to setup temperature sensor."); return false; }
 
-    // Step 5: Set clock divisor
     if (!setupClockDivisor()) { Debug.Error("Failed to set clock divisor."); return false; }
 
-    // Step 6: Initialize voltage and current to 0
     //setVoltage(0.0);
-    //sleepMs(200); // Sleep for 200ms
+    //sleepMs(200);
     //setCurrent(0.0);
 
     if constexpr (minixDebug) Debug.Log("MiniX initialization completed successfully.");

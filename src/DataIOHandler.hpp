@@ -8,7 +8,6 @@ class DIOHandler {
     
 public:
     Controller* controller;
-    MinixController minixController;
 
     DIOHandler(Controller* ctrl) : controller(ctrl) {
         minixController.controller = ctrl;
@@ -22,11 +21,15 @@ public:
     //Minix Interface Methods
     void connectMiniX();
     void disconnectMiniX();
+    void setVoltage(double voltage) { minixController.setVoltage(voltage); }
+    void setCurrent(double current) { minixController.setCurrent(current); }
 
     //IO Auto Logic
     void deviceStatusChecks(float elapsedMS);
-    void minixAutoLogic(float elapsedMS);
     float tempReadPassed = 0.0; float minixSafetyCheckPassed = 0.0;
 
+private:
+    MinixController minixController;
+    void minixAutoLogic(float elapsedMS);
 
 };

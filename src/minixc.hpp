@@ -26,6 +26,9 @@ public:
     double readCurrent();
     double readTemperature();
     bool safetyChecks();
+    void setVoltage(double voltage);
+    void setCurrent(double voltage);
+    void setHVOnOff(bool on);
 
 private:
     // Minix Setup and close Methods
@@ -38,14 +41,12 @@ private:
     bool setupTemperatureSensor();
     bool setupClockDivisor();
     void purgeMinixInfo();
+    void SetParametersToDefault();
 
     // Minix Checks
     bool connectionChecks();
 
-
     // Minix Control Methods
-    void setVoltage(double voltage);
-    void setCurrent(double current);
     void testread();
 
     //Global Data Variables
@@ -63,9 +64,35 @@ private:
     bool isDeviceOpen = false;
     bool isMpsseOn = false;
 
+    bool hvOn = false;
+    bool HVOffErr = false;
+    bool HVSetErr = false;
+    bool CurrentSetErr = false;
+
+    // Mini-X Configuration Parameters
+    double DefaultHighVoltage;
+    double HighVoltageMin;
+    double HighVoltageMax;
+    double HighVoltageConversionFactor;
+    double DefaultCurrent;
+    double CurrentMin;
+    double CurrentMax;
+    double CurrentConversionFactor; // controller to tube current conversion factor
+    double VRef;					// DAC/ADC reference voltage 
+    double DAC_ADC_Scale;			// DAC/ADC scale = 2^resolution bits wide
+    double WattageMax;
+    double SafetyMargin;
+    double SafeWattageMW;
+
+    FT_HANDLE m_ftHandle;
+
+    bool debug = false;
+    float result = -1;;
+    double voltagekV = 0.;
+    double currentuA = 0.;
+
     // Hardware state variables
     unsigned char LowByteHiLowState;
     unsigned char HighByteHiLowState;
-    bool hvOn = false;
 
 };

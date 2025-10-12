@@ -76,6 +76,10 @@
         "stack": "cpp",
         "typeindex": "cpp",
         "chrono": "cpp",
-        "iomanip": "cpp"
-    }
+        "iomanip": "cpp",
+        "queue": "cpp"
+    },
+    "editor.codeLens": true,
+    "C_Cpp.codeLens.enabled": true
 }
+
