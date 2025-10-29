@@ -1,5 +1,5 @@
 #include "deviceHandler.hpp"
-#include "devices/baseDevice.hpp"
+#include "devices/deviceCore.hpp"
 #include "debug.hpp"
 #include "devices/comps/allComponents.hpp"
 
@@ -53,6 +53,10 @@ int DeviceHandler::FTDIScan() {
             if (isMatch) { if constexpr(debug) Debug.Log("MATCH FOUND! Device '" + deviceName + "' matches FTDI device '" + foundDeviceName + "' (Serial: " + foundSerial + ")");
                 auto matchedDevice = entry.creator();
                 auto* ftdiComp = static_cast<FTDIConnection*>(matchedDevice->getComponent(typeid(FTDIConnection)));
+                if (ftdiComp == nullptr) {
+                    Debug.Error("FTDIConnection component not found in device created for " + deviceName + ", this is a fatal error. Restart the program.");
+                    continue;
+                }
                 ftdiComp->setFTDIIndex(static_cast<int>(i));
                 ftdiComp->setDevInfo(devInfo);
                 activeDevices.push_back(std::move(matchedDevice));

@@ -1,6 +1,8 @@
 #include "FTDIConnection.hpp"
 #include "debug.hpp"
 #include "Utilities.hpp"
+#include "deviceCore.hpp"
+
 using namespace Utilities;
 
 bool FTDIConnection::connectToDevice() {
@@ -93,10 +95,8 @@ FT_STATUS FTDIConnection::receiveData(unsigned char* buffer, DWORD size, DWORD& 
     return ftStatus;
 }
 
-void FTDIConnection::setupDeviceSettings(std::string deviceName) {
-    if (setupDone) return;
-
-    myDeviceName = deviceName;
-
-    setupDone = true;
+bool FTDIConnection::Initialize() {
+    memset(&devInfo, 0, sizeof(devInfo));
+    myDeviceName = parent->deviceInfo.deviceName;
+    return true;
 }

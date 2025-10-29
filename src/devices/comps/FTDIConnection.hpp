@@ -1,10 +1,12 @@
 #pragma once
 #include <ftd2xx.h>
 #include <string>
+#include "componentCore.hpp"
 
 template<typename... Components> class BaseDevice;
+class EmptyDevice;
 
-class FTDIConnection {
+class FTDIConnection : public BaseComponent {
 public:
     template<typename DeviceType> FTDIConnection(DeviceType& parentDevice) : 
     parent(&parentDevice),
@@ -18,13 +20,13 @@ public:
     deviceIsOpen(false),
     setupDone(false),
     myDeviceName("") {
-        memset(&devInfo, 0, sizeof(devInfo));
+        // Initialization
+        Initialize();
     }
 
     //Interface Methods
     FT_STATUS sendData(const unsigned char* data, DWORD size);
     FT_STATUS receiveData(unsigned char* buffer, DWORD size, DWORD& bytesRead);
-    void setupDeviceSettings(std::string deviceName);
     bool connectToDevice();
     void disconnectFromDevice();
 
@@ -50,10 +52,11 @@ private:
     int FTDIIndex = -1;
     bool setupDone = false;
     bool connected = false;
-    void* parent; // Pointer to parent device
+    EmptyDevice* parent;
     bool openMPSSE();
     bool openDevice();
     void purgeBuffers();
     void closeDevice();
+    bool Initialize();
 
 };

@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <memory>
-#include "devices/baseDevice.hpp"
+#include "devices/deviceCore.hpp"
 #include "ftd2xx.h"
 
 
