@@ -5,6 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/src",
+                "${workspaceFolder}/src/devices",
+                "${workspaceFolder}/src/devices/comps",
                 "F:/payton13",
                 "F:/payton13/lib/site-packages/pybind11/include",
                 "F:/payton13/include"

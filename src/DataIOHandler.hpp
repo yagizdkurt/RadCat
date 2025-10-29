@@ -8,6 +8,7 @@ class DIOHandler {
     
 public:
     Controller* controller;
+    static constexpr bool debug = false;
 
     DIOHandler(Controller* ctrl) : controller(ctrl) {
         minixController.controller = ctrl;

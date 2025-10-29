@@ -4,6 +4,10 @@
 #include "utilities.hpp"
 #include "minxUtils.hpp"
 #include "debug.hpp"
+#include "devices/baseDevice.hpp"
+#include "devices/comps/FTDIConnection.hpp"
+#include <algorithm>
+#include <cctype>
 
 using namespace Utilities;
 

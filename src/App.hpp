@@ -12,6 +12,7 @@
 #include "Debug.hpp"
 #include "DataIOHandler.hpp"
 #include "pyManager.hpp"
+#include "udpHandler.hpp"
 
 using namespace std;
 
@@ -29,8 +30,9 @@ public:
     DIOHandler dataHandler;
     PyManager pyManager;
     PyManager& getPyManager() { return pyManager; }
+    UDPHandler udpHandler;
 
-    Controller() : dataHandler(this), pyManager(this) { if(systemInitializor()) run(); }
+    Controller() : dataHandler(this), pyManager(this), udpHandler() { if(systemInitializor()) run(); }
     ~Controller(){}
 
     //Main Methods
@@ -42,7 +44,7 @@ public:
     // Task queue methods
     void queueTask(std::function<void()> task);
     void processQueuedTasks();
-
+    void processUDPData(string data);
     // ----- THREAD SHARED DATA -----
 
     // Shared Minix Data
