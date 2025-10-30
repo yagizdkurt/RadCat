@@ -24,6 +24,22 @@
 
 ---
 
-> “Radiation automation made friendly — built by researchers, for researchers.”
+> “Radiation automation made friendly — built by young researchers, for all researchers.”
 
 ---
+
+## 📘 Explore the Wiki
+
+RadCat has a growing [**Wiki**](https://github.com/yagizdkurt/RadCat/wiki) full of guides, setup instructions, and technical documentation.  
+
+### 🗂️ Quick Navigation
+
+| Section | Description |
+|----------|--------------|
+| 🧭 [Overview](https://github.com/yagizdkurt/RadCat/wiki/Overview) | Learn what RadCat is and how it works |
+| ⚙️ [Getting Started](https://github.com/yagizdkurt/RadCat/wiki/Getting-Started) | Install, configure, and connect your first device |
+| 🧩 [Components](https://github.com/yagizdkurt/RadCat/wiki/ComponentCore) | See available modular components |
+| 🧠 [Creating New Devices](https://github.com/yagizdkurt/RadCat/wiki/Device-Core) | Learn to build your own device definitions |
+
+> 📄 *Can’t find what you need?*  
+> Open an [Issue](https://github.com/yagizdkurt/RadCat/issues) to ask questions.
