@@ -94,8 +94,8 @@ Bit 7 (0x80): [Unused/Reserved]
 #pragma endregion
 
 bool MiniXDevice::connect() {
-
-    
+    if (!connection.fConnect()) return false;
+    if (!initializeGPIOs()) return false;
     return true;
 }
 
@@ -105,11 +105,6 @@ bool MiniXDevice::disconnect() {
 
 void MiniXDevice::cycleCheck() {
     // Implement cycle check logic if needed
-}
-
-bool MiniXDevice::checkConnectionMatch() {
-    // Implement connection match check logic if needed
-    return true;
 }
 
 double MiniXDevice::readValue(const std::string& parameter) {

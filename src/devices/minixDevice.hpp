@@ -5,9 +5,8 @@
 class MiniXDevice : public BaseDevice<FTDIConnection> {
 public:
     static constexpr bool debug = false;
-    MiniXDevice() {
-        deviceInfo.model = "Mini-X";
-    }
+    MiniXDevice() {}
+    static inline const DeviceRegistry::RegistryEntry::DeviceInfo deviceInfo = {"Mini-X","1.0","Manufacturer","Description"};
 
     // Implement virtual methods
     virtual bool connect() override;

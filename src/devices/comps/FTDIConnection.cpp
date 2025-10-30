@@ -5,7 +5,7 @@
 
 using namespace Utilities;
 
-bool FTDIConnection::connectToDevice() {
+bool FTDIConnection::fConnect() {
     if (connected) return true;
     tryingToConnect = true;
 
@@ -15,6 +15,27 @@ bool FTDIConnection::connectToDevice() {
     connected = true;
     tryingToConnect = false;
     return true; // Successfully connected
+}
+
+bool FTDIConnection::fDisconnect() {
+    if (!connected && !deviceIsOpen) return true;
+    if(!closeDevice()) return false;
+    connected = false;
+    deviceIsOpen = false;
+    if constexpr (debug) Debug.Log("FTDI device disconnected successfully.");
+    return true;
+}
+
+bool FTDIConnection::closeDevice(){
+    if (!deviceIsOpen) return true;
+    purgeBuffers();
+    FT_ResetDevice(ftHandle);
+    FT_STATUS status = FT_Close(ftHandle);
+    if (status != FT_OK) { Debug.Error("Failed to close FTDI device: " + std::to_string(status)); return false; }
+    deviceIsOpen = false;
+    ftHandle = nullptr;
+    if constexpr (debug) Debug.Log("FTDI device closed successfully.");
+    return true;
 }
 
 bool FTDIConnection::openDevice(){

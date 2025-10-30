@@ -12,10 +12,9 @@
 // Device registration macro REGISTER_DEVICE(class, "Name");
 #define REGISTER_DEVICE(TYPE, NAME) \
     static inline bool registered_##TYPE = [](){ \
-        auto tempDevice = std::make_unique<TYPE>(); \
         DeviceRegistry::registry()[NAME] = { [](){ return std::make_unique<TYPE>(); }, \
             BaseDevice<>::tuple_types<decltype(std::declval<TYPE>().components)>::get(), \
-            tempDevice->deviceInfo }; \
+            TYPE::deviceInfo }; \
         return true; \
     }()
 
@@ -24,7 +23,7 @@ class EmptyDevice {
 public:
     virtual ~EmptyDevice() = default;
     virtual void* getComponent(const std::type_info& ti) { return nullptr; }
-    DeviceRegistry::RegistryEntry::DeviceInfo deviceInfo;
+    static inline const DeviceRegistry::RegistryEntry::DeviceInfo deviceInfo = {"Unset","Unset","Unset","Unset"};
 };
 
 // All devices should inherit from this template
@@ -37,7 +36,6 @@ public:
     virtual bool connect() = 0;
     virtual bool disconnect() = 0;
     virtual void cycleCheck() = 0;
-    virtual bool checkConnectionMatch() = 0;
     virtual double readValue(const std::string& parameter) = 0;
     virtual bool setValue(const std::string& parameter, double value) = 0;
 

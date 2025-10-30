@@ -517,7 +517,7 @@ bool MinixController::findMinixDevice(){
         // Retrieve device info
         FT_DEVICE_LIST_INFO_NODE devInfo;
         ftStatus = FT_GetDeviceInfoDetail(i,&devInfo.Flags, &devInfo.Type,&devInfo.ID,&devInfo.LocId,devInfo.SerialNumber,devInfo.Description, &devInfo.ftHandle);
-        if (ftStatus != FT_OK) {Debug.Error("Error getting device info for device " + std::to_string(i) + ": ", ftStatus);continue;}
+        if (ftStatus != FT_OK) {Debug.Error("Error getting device info for device " + std::to_string(i) + ": ", ftStatus); continue;}
 
         // Check if description contains "Mini-X" or "AMPTEK"
         if (strstr(devInfo.Description, "Mini-X") != nullptr || 
@@ -602,6 +602,7 @@ bool MinixController::openMPSSE()
 
     purgeBuffers(ftHandle);
     sleepMs(50);
+    
     // Verify MPSSE mode by sending a test command and checking response
     unsigned char rx[10];
     tx[0] = 0xAA;

@@ -3,10 +3,7 @@
 #include <string>
 #include "componentCore.hpp"
 
-template<typename... Components> class BaseDevice;
-class EmptyDevice;
-
-class FTDIConnection : public BaseComponent {
+COMPONENT class FTDIConnection : public BaseComponent {
 public:
     template<typename DeviceType> FTDIConnection(DeviceType& parentDevice) : 
     parent(&parentDevice),
@@ -27,8 +24,8 @@ public:
     //Interface Methods
     FT_STATUS sendData(const unsigned char* data, DWORD size);
     FT_STATUS receiveData(unsigned char* buffer, DWORD size, DWORD& bytesRead);
-    bool connectToDevice();
-    void disconnectFromDevice();
+    bool fConnect();
+    bool fDisconnect();
 
     //Getters and Setters
     void setFTDIIndex(int index) { if (FTDIIndex != -1) return; FTDIIndex = index; } //Set only if not set
@@ -36,9 +33,8 @@ public:
     int getFTDIIndex() const { return FTDIIndex; }
     FT_DEVICE_LIST_INFO_NODE getDevInfo() const { return devInfo; }
     bool isConnected() const { return connected; }
-
-    bool tryingToConnect = false;
-    bool deviceIsOpen = false;
+    bool isDeviceOpen() const { return deviceIsOpen; }
+    bool isTryingToConnect() const { return tryingToConnect; }
 
 private:
     
@@ -52,11 +48,12 @@ private:
     int FTDIIndex = -1;
     bool setupDone = false;
     bool connected = false;
-    EmptyDevice* parent;
+    bool tryingToConnect = false;
+    bool deviceIsOpen = false;
     bool openMPSSE();
     bool openDevice();
     void purgeBuffers();
-    void closeDevice();
+    bool closeDevice();
     bool Initialize();
 
 };
