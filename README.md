@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/yagizdkurt/RadCat/blob/main/Docs/Logo.png" width="200">
+  <img src="https://github.com/yagizdkurt/RadCat/blob/main/Docs/Logo.png" width="500">
 </p>
 
 <h1 align="center">🐾 RadCat</h1>
