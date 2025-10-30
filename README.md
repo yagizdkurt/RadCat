@@ -9,9 +9,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/yagizdkurt/RadCat/stargazers"><img src="https://img.shields.io/github/stars/yagizdkurt/RadCat?style=for-the-badge" alt="GitHub Stars"></a>
-  <a href="https://github.com/yagizdkurt/RadCat/releases"><img src="https://img.shields.io/github/v/release/yagizdkurt/RadCat?style=for-the-badge" alt="Release Version"></a>
-  <a href="https://github.com/yagizdkurt/RadCat/blob/main/LICENSE"><img src="https://img.shields.io/github/license/yagizdkurt/RadCat?style=for-the-badge" alt="License"></a>
+  <a href="https://github.com/yagizdkurt/RadCat/stargazers"><img src="https://img.shields.io/github/stars/yagizdkurt/RadCat" alt="GitHub Stars"></a>
+  <a href="https://github.com/yagizdkurt/RadCat/releases"><img src="https://img.shields.io/github/v/release/yagizdkurt/RadCat" alt="Release Version"></a>
+  <a href="https://github.com/yagizdkurt/RadCat/blob/main/LICENSE"><img src="https://img.shields.io/github/license/yagizdkurt/RadCat" alt="License"></a>
 </p>
 
 ---
