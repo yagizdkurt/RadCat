@@ -103,8 +103,17 @@ bool MiniXDevice::disconnect() {
     return true;
 }
 
-void MiniXDevice::cycleCheck() {
-    // Implement cycle check logic if needed
+void MiniXDevice::update() {
+    safetyChecks();
+}
+
+void MiniXDevice::setupTasks() { 
+    tasks = {
+            {std::chrono::steady_clock::now(), 1000, [this]{ currentTemperature = readTemperature(); }},
+            {std::chrono::steady_clock::now(), 2000, [this]{ currentCurrent = readCurrent(); }},
+            {std::chrono::steady_clock::now(), 3000, [this]{ currentVoltage = readVoltage(); }},
+            // ...
+    };
 }
 
 double MiniXDevice::readValue(const std::string& parameter) {
@@ -115,6 +124,234 @@ double MiniXDevice::readValue(const std::string& parameter) {
 bool MiniXDevice::setValue(const std::string& parameter, double value) {
     // Implement setting values based on the parameter
     return true;
+}
+
+
+bool MiniXDevice::setupClockDivisor(){
+    unsigned char tx[10]; DWORD ret_bytes; int pos = 0;
+    setClockDivisor(tx, pos, 3);
+    FT_STATUS status = connection.sendData(tx, pos);
+    if (status != FT_OK) { Debug.Error("Error setting clock divisor: ", status); return false; }
+    if constexpr (debug) Debug.Log("Clock divisor set successfully.");
+    return true;
+}
+
+bool MiniXDevice::setupTemperatureSensor(){
+    unsigned char tx[100]; DWORD ret_bytes; int pos = 0;
+    setClockDivisor(tx, pos, 0);
+
+    //take TSCS low and clock 2 bytes of data into the Temp Sensor
+    tx[pos++] = 0x80;//Setup MPSSE Low byte I/O lines
+    CLEAR(LowByteHiLowState, CLKSTATE);//take CLock low
+    tx[pos++] = LowByteHiLowState;
+    tx[pos++] = OUTPUTMODE;
+
+    // set TS chip select high
+    tx[pos++] = 0x82;//Setup MPSSE High byte I/O lines
+    SET(HighByteHiLowState, TSCS);  //take chip select high
+    tx[pos++] = HighByteHiLowState;//1110 0011  hi/low state if output (clock & data init to high)
+    tx[pos++] = OUTPUTMODE_H;
+
+    //take TSCS low and clock 2 bytes of data into the Temp Sensor
+    tx[pos++] = 0x80;//Setup MPSSE Low byte I/O lines
+    CLEAR(LowByteHiLowState, CLKSTATE);//take CLock low
+    tx[pos++] = LowByteHiLowState;
+    tx[pos++] = OUTPUTMODE;
+
+    //take TSCS low and clock 2 bytes of data into the Temp Sensor
+    tx[pos++] = 0x80;//Setup MPSSE Low byte I/O lines
+    CLEAR(LowByteHiLowState, CLKSTATE);//take CLock low
+    tx[pos++] = LowByteHiLowState;
+    tx[pos++] = OUTPUTMODE;
+
+    //take TSCS low and clock 2 bytes of data into the Temp Sensor
+    tx[pos++] = 0x80;//Setup MPSSE Low byte I/O lines
+    SET(LowByteHiLowState, CLKSTATE);
+    tx[pos++] = LowByteHiLowState;
+    tx[pos++] = OUTPUTMODE;
+
+    tx[pos++] = 0x10;   //Clock out 2 bytes on positive edge, MSB first
+    tx[pos++] = 0x01;   //LengthL 0=1byte, 1=2bytes
+    tx[pos++] = 0x00;   //LengthH 
+    tx[pos++] = TSCONFIG; //set configuration register
+    tx[pos++] = TSCMD + 0x08;   // continuous convert, 12-bit res., no shutdown
+
+    // set TS chip select low
+    tx[pos++] = 0x82;//Setup MPSSE High byte I/O lines
+    CLEAR(HighByteHiLowState, TSCS);  //take chip select low
+    tx[pos++] = HighByteHiLowState;// 1110 0011  hi/low state if output (clock & data init to high)
+    tx[pos++] = OUTPUTMODE_H;
+
+    FT_STATUS status = connection.sendData(tx, pos);
+    if (status != FT_OK) { Debug.Error("Temperature Sensor setup error"); return false; }
+    return true;
+}
+
+bool MiniXDevice::initialize() {
+    if (!setupTemperatureSensor()) return false;
+    if (!setupClockDivisor()) return false;
+
+    //setVoltage(0.0);
+    //sleepMs(200);
+    //setCurrent(0.0);
+
+    if constexpr (debug) Debug.Log("MiniX initialization completed successfully.");
+    return true;
+}
+
+
+// Minix Self Functions
+
+double MiniXDevice::readVoltage() {
+    if (!connection.isDeviceOpen() || !connection.isMPSSEOn()) {Debug.Error("Device not open or MPSSE not enabled for temperature reading.");return -1.0;}
+    unsigned char tx[100], rx[100]; DWORD ret_bytes; int pos = 0;
+
+    MinixUtilities::setClockDivisor(tx, pos);
+    
+    // Start condition - take ADC clock enable low
+    tx[pos++] = CMD_SET_DATA_BITS_LOWBYTE;
+    LowByteHiLowState &= ~ADCS; // Clear ADCS bit (take ADC clock enable low)
+    LowByteHiLowState &= ~CLKSTATE; // Clear CLKSTATE (take clock low)
+    tx[pos++] = LowByteHiLowState;
+    tx[pos++] = OUTPUTMODE;
+
+    // Send control nibble - clock out 4 bits
+    tx[pos++] = CMD_CLOCK_OUT_BITS_MSB;
+    tx[pos++] = LENGTH_4_BITS;
+    tx[pos++] = AD0; // Voltage channel
+
+    // Set data direction to input
+    tx[pos++] = CMD_SET_DATA_BITS_LOWBYTE;
+    tx[pos++] = LowByteHiLowState;
+    tx[pos++] = INPUTMODE;
+
+    // Read 2 bytes from A/D conversion
+    tx[pos++] = CMD_CLOCK_IN_BYTES_MSB;
+    tx[pos++] = LENGTH_2_BYTES;
+    tx[pos++] = LENGTH_1_BYTE; // LengthH
+
+    // Take ADCS back high
+    tx[pos++] = CMD_SET_DATA_BITS_LOWBYTE;
+    LowByteHiLowState |= ADCS; // Set ADCS bit (take ADC enable high)
+    tx[pos++] = LowByteHiLowState;
+    tx[pos++] = OUTPUTMODE;
+
+    // Send the command string
+    FT_STATUS status = connection.sendData(tx, pos);
+    if (status != FT_OK) {Debug.Error("HV ADC write command error: ", status);return -1.0;}
+    if (status == FT_OK) {Debug.Log("HV ADC write command sent successfully.");}
+
+    sleepMs(50);
+
+    // Read the reply and checksum validation
+    status = connection.receiveData(rx, 2, ret_bytes);
+    if (status != FT_OK) {Debug.Error("HV ADC read data status error: ", status);return -1.0;}
+    if (ret_bytes < 2) {Debug.Error("HV ADC too few data bytes returned: ", ret_bytes);return -1.0;}
+    if (!Utilities::validateAndLogData(rx, 2, "HV ADC")) {return -1.0;}
+
+    // Convert ADC result to voltage (bit manipulation handled in utility)
+    double voltage = MinixUtilities::convertToVoltage(rx[0], rx[1]);
+
+    Debug.Log("Read voltage: " + std::to_string(voltage) + " kV");
+    return voltage;
+}
+
+double MiniXDevice::readCurrent() {
+    if (!connection.isDeviceOpen() || !connection.isMPSSEOn()) {Debug.Error("Device not open or MPSSE not enabled for temperature reading.");return -1.0;}
+    unsigned char tx[100], rx[100]; DWORD ret_bytes; int pos = 0;
+
+    MinixUtilities::setClockDivisor(tx, pos);
+    
+    // Start condition - take ADC clock enable low
+    tx[pos++] = CMD_SET_DATA_BITS_LOWBYTE;
+    LowByteHiLowState &= ~ADCS; // Clear ADCS bit (take ADC clock enable low)
+    LowByteHiLowState &= ~CLKSTATE; // Clear CLKSTATE (take clock low)
+    tx[pos++] = LowByteHiLowState;
+    tx[pos++] = OUTPUTMODE;
+
+    // Send control nibble - clock out 4 bits
+    tx[pos++] = CMD_CLOCK_OUT_BITS_MSB;
+    tx[pos++] = LENGTH_4_BITS;
+    tx[pos++] = AD1; // Current channel
+
+    // Set data direction to input
+    tx[pos++] = CMD_SET_DATA_BITS_LOWBYTE;
+    tx[pos++] = LowByteHiLowState;
+    tx[pos++] = INPUTMODE;
+
+    // Read 2 bytes from A/D conversion
+    tx[pos++] = CMD_CLOCK_IN_BYTES_MSB;
+    tx[pos++] = LENGTH_2_BYTES;
+    tx[pos++] = LENGTH_1_BYTE; // LengthH
+
+    // Take ADCS back high
+    tx[pos++] = CMD_SET_DATA_BITS_LOWBYTE;
+    LowByteHiLowState |= ADCS; // Set ADCS bit (take ADC enable high)
+    tx[pos++] = LowByteHiLowState;
+    tx[pos++] = OUTPUTMODE;
+
+    // Send the command string
+    FT_STATUS status = connection.sendData(tx, pos);
+    if (status != FT_OK) {Debug.Error("Current ADC write command error: ", status);return -1.0;}
+    if constexpr (debug) Debug.Log("Current ADC write command sent successfully.");
+    sleepMs(200);
+
+    // Read the reply
+    status = connection.receiveData(rx, 2, ret_bytes);
+    if (status != FT_OK) {Debug.Error("Current ADC read data status error: ", status);return -1.0;}
+    if (ret_bytes < 2) {Debug.Error("Current ADC too few data bytes returned: ", ret_bytes);return -1.0;}
+    if (!Utilities::validateAndLogData(rx, 2, "Current ADC")) {return -1.0;}
+
+    double current = MinixUtilities::convertToCurrent(rx[0], rx[1]);
+
+    Debug.Log("Read current: " + std::to_string(current) + " uA");
+    return current;
+}
+
+double MiniXDevice::readTemperature() {
+    if (!connection.isDeviceOpen() || !connection.isMPSSEOn()) {Debug.Error("Device not open or MPSSE not enabled for temperature reading.");return -1.0;}
+    unsigned char tx[100], rx[100]; DWORD ret_bytes; int pos = 0;
+
+    setClockDivisor(tx, pos, 3);
+    // Set TS chip select low (prepare for communication)
+    tx[pos++] = CMD_SET_DATA_BITS_HIGHBYTE;
+    CLEAR(HighByteHiLowState, TSCS);  // TS chip select low
+    tx[pos++] = HighByteHiLowState;
+    tx[pos++] = OUTPUTMODE_H;
+    tx[pos++] = CMD_SET_DATA_BITS_LOWBYTE;
+    CLEAR(LowByteHiLowState, CLKSTATE);
+    CLEAR(LowByteHiLowState, DATASTATE);
+    tx[pos++] = LowByteHiLowState;
+    tx[pos++] = OUTPUTMODE;
+    activateTemperatureSensor(tx, pos, HighByteHiLowState);
+    tx[pos++] = CMD_SET_DATA_BITS_LOWBYTE;
+    SET(LowByteHiLowState, CLKSTATE);
+    CLEAR(LowByteHiLowState, DATASTATE);
+    tx[pos++] = LowByteHiLowState;
+    tx[pos++] = OUTPUTMODE;
+    // Read cmd
+    tx[pos++] = 0x12; // Clock out bits, MSB first (different from 0x13!)
+    tx[pos++] = 0x07; // 7 = 8 bits - 1
+    tx[pos++] = 0x01; // CORRECT temp sensor command (not 0xE0!)
+    // Read 2 bytes from temperature sensor (CORRECT COMMAND!)
+    tx[pos++] = 0x20; // Clock IN bytes, MSB first (not CMD_CLOCK_IN_BYTES_MSB!)
+    tx[pos++] = LENGTH_2_BYTES;  // Read 2 bytes
+    tx[pos++] = LENGTH_1_BYTE;   // High byte = 0 (total = 2 bytes)
+    deactivateTemperatureSensor(tx, pos, HighByteHiLowState);
+
+    FT_STATUS status = connection.sendData(tx, pos);
+    if (status != FT_OK) {Debug.Error("Temperature sensor write command error: ", status);return -1.0;}
+    if constexpr (debug) Debug.Log("Temperature sensor write command sent successfully.");
+    sleepMs(50);
+
+    status = connection.receiveData(rx, 2, ret_bytes);
+    if (status != FT_OK) {Debug.Error("Temperature sensor read data status error: ", status);return -1.0;}
+    if (ret_bytes < 2) {Debug.Error("Temperature sensor too few data bytes returned: ", ret_bytes);return -1.0;}
+    if (!Utilities::validateAndLogData(rx, 2, "Temperature Sensor")) {return -1.0;}
+    // Process temperature result (different from ADC - direct MSB/LSB)
+    double temperature = MinixUtilities::convertToTemperature(rx[1], rx[0], false); // Celsius
+    if constexpr (debug) Debug.Log("Read temperature: " + std::to_string(temperature) + " C");
+    return temperature;
 }
 
 bool MiniXDevice::initializeGPIOs() {
@@ -136,5 +373,44 @@ bool MiniXDevice::initializeGPIOs() {
     tx[pos++] = OUTPUTMODE;//0xFB
     status = connection.sendData(tx, pos);
     if(status != FT_OK){printf("Error initializing I/O lines.\n");return false;}
+    return true;
+}
+
+void MiniXDevice::startingParameters() {
+    // Initialize MiniX parameters
+    DefaultHighVoltage = 15.0;          // Default High Voltage kV
+    HighVoltageMin = (double)9.999999;  // High Voltage Min
+    HighVoltageMax = 40.0;            // High Voltage Max
+    HighVoltageConversionFactor = 10.0;     // High Voltage Conversion Factor
+    DefaultCurrent = 15.0;              // Default Current
+    CurrentMin = (double)4.999999;
+    CurrentMax = 200.0;             // Current Max
+    CurrentConversionFactor = 50.0;       // Current Conversion Factor
+    VRef = 4.096;           // Reference Voltage 
+    DAC_ADC_Scale = 4096;           // DAC ADC Scale 
+    WattageMax = 4.00;              // Wattage Max 
+    SafetyMargin = 0.050;       // Safety Margin
+    SafeWattageMW = (double)((WattageMax - SafetyMargin) * 1000.0);
+    TemperatureMax = 50.0;         // Temperature Max C
+    TemperatureMin = 0.0;          // Temperature Min C 
+}
+
+bool MiniXDevice::safetyChecks() {
+
+    if (currentVoltage > HighVoltageMax || currentVoltage < HighVoltageMin) {
+        Debug.Error("Voltage out of bounds: ", currentVoltage);
+        return false;
+    }
+
+    if (currentCurrent > CurrentMax || currentCurrent < CurrentMin) {
+        Debug.Error("Current out of bounds: ", currentCurrent);
+        return false;
+    }
+
+    if (currentTemperature > TemperatureMax || currentTemperature < TemperatureMin) {
+        Debug.Error("Temperature out of bounds: ", currentTemperature);
+        return false;
+    }
+
     return true;
 }

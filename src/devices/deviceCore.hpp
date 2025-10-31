@@ -26,6 +26,12 @@ public:
     static inline const DeviceRegistry::RegistryEntry::DeviceInfo deviceInfo = {"Unset","Unset","Unset","Unset"};
 };
 
+struct PeriodicTask {
+    std::chrono::steady_clock::time_point lastUpdate;
+    int intervalMs;
+    std::function<void()> task;
+};
+
 // All devices should inherit from this template
 template<typename... Components> class BaseDevice : public EmptyDevice {
 public:
@@ -35,9 +41,11 @@ public:
     // Pure virtual methods to be implemented by derived classes
     virtual bool connect() = 0;
     virtual bool disconnect() = 0;
-    virtual void cycleCheck() = 0;
+    virtual void update(){}
     virtual double readValue(const std::string& parameter) = 0;
     virtual bool setValue(const std::string& parameter, double value) = 0;
+    virtual void setupTasks(){}
+    bool tasksActive = false;
 
     // Components
     std::tuple<Components...> components;
@@ -45,7 +53,6 @@ public:
     const std::tuple<Components...>& getComponents() const { return components; }
     template<typename T> T& getComponent() { return std::get<T>(components); }
     template<typename T> const T& getComponent() const { return std::get<T>(components); }
-    void componentUpdate() { ([&] { getComponent<Components>().update(); }(), ...); }
     void* getComponent(const std::type_info& ti) override {
         void* result = nullptr;
         ([&] { if (typeid(Components) == ti) result = static_cast<void*>(&getComponent<Components>()); }(), ...);
@@ -56,6 +63,25 @@ public:
     template<typename... Ts> struct tuple_types<std::tuple<Ts...>> {
         static std::vector<std::type_index> get() { return { std::type_index(typeid(Ts))... }; }
     };
+
+    void systemUpdate(){
+        componentUpdate();
+        update();
+        if (!tasksActive) return;
+        auto now = std::chrono::steady_clock::now();
+        for (auto& t : tasks) {
+            if (std::chrono::duration_cast<std::chrono::milliseconds>(now - t.lastUpdate).count() >= t.intervalMs) {
+                t.task();
+                t.lastUpdate = now;
+            }
+        }
+    }
+
+protected:
+    std::vector<PeriodicTask> tasks;
+
+private:
+    void componentUpdate() { ([&] { getComponent<Components>().update(); }(), ...); }
 
 };
 

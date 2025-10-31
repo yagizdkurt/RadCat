@@ -24,6 +24,7 @@ public:
     //Interface Methods
     FT_STATUS sendData(const unsigned char* data, DWORD size);
     FT_STATUS receiveData(unsigned char* buffer, DWORD size, DWORD& bytesRead);
+    bool PollData(DWORD bytesToRead, DWORD& bytesRead, int timeoutMs);
     bool fConnect();
     bool fDisconnect();
 
@@ -34,6 +35,7 @@ public:
     FT_DEVICE_LIST_INFO_NODE getDevInfo() const { return devInfo; }
     bool isConnected() const { return connected; }
     bool isDeviceOpen() const { return deviceIsOpen; }
+    bool isMPSSEOn() const { return setupDone; }
     bool isTryingToConnect() const { return tryingToConnect; }
 
 private:

@@ -121,3 +121,24 @@ bool FTDIConnection::Initialize() {
     myDeviceName = parent->deviceInfo.deviceName;
     return true;
 }
+
+bool FTDIConnection::PollData(DWORD bytesToRead, DWORD& bytesRead, int timeoutMs) {
+    if(ftHandle == nullptr || bytesToRead == 0) {Debug.Error("PollData: Invalid handle or bytesToRead."); return false;}
+    if(timeoutMs <= 0) {Debug.Error("PollData: timeout must be positive."); return false;}
+    DWORD rxBytes = 0; bytesRead = 0; int elapsed = 0; const int pollInterval = 20;
+    
+    while (bytesRead < bytesToRead && elapsed < timeoutMs) {
+        FT_GetQueueStatus(ftHandle, &rxBytes);
+        if (rxBytes > 0) {
+            bytesRead = rxBytes;
+            if (bytesRead > bytesToRead) { bytesRead = bytesToRead; }
+        }
+        Utilities::sleepMs(pollInterval);
+        elapsed += pollInterval;
+    }
+    if (bytesRead < bytesToRead) { Debug.Warn("PollData: Timeout waiting for data. Requested: " + std::to_string(bytesToRead) +  ", Received: " + std::to_string(bytesRead)); return false; } 
+    else { 
+        Debug.Log("PollData: Successfully polled " + std::to_string(bytesRead) + " bytes of data."); 
+        return true; 
+    }
+}

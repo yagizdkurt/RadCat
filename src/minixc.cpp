@@ -551,7 +551,7 @@ bool MinixController::initializeMiniX() {
     return true;
 }
 
-bool MinixController::openDevice(const char* serialNumber) {
+bool MinixController::openDevice(const char* serialNumber) {//.
     if (isDeviceOpen) {Debug.Warn("Device is already open. Not fatal but a bug.");return true;}
 
     FT_STATUS status = FT_OpenEx((PVOID)serialNumber, FT_OPEN_BY_SERIAL_NUMBER, &ftHandle);
@@ -566,7 +566,7 @@ bool MinixController::openDevice(const char* serialNumber) {
     return true;
 }
 
-bool MinixController::openMPSSE() 
+bool MinixController::openMPSSE() //.
 {
     unsigned char tx[100]; FT_STATUS status; DWORD ret_bytes;
 
@@ -617,7 +617,7 @@ bool MinixController::openMPSSE()
     return true;
 }
 
-bool MinixController::setupClockDivisor() {
+bool MinixController::setupClockDivisor() {//.
     unsigned char tx[10]; DWORD ret_bytes; int pos = 0;
 
     purgeBuffers(ftHandle);
@@ -629,7 +629,7 @@ bool MinixController::setupClockDivisor() {
     return true;
 }
 
-bool MinixController::setupTemperatureSensor() {
+bool MinixController::setupTemperatureSensor() { //.
     if (!isDeviceOpen || !isMpsseOn) {Debug.Error("Device not ready for temperature sensor setup");return false;}
     unsigned char tx[100]; DWORD ret_bytes; int pos = 0;
     setClockDivisor(tx, pos, 0);
