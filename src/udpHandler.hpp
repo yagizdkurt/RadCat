@@ -11,7 +11,9 @@
 #endif
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#ifdef _MSC_VER
 #pragma comment(lib, "ws2_32.lib")
+#endif
 typedef SOCKET socket_t;
 #define SOCKET_INVALID INVALID_SOCKET
 #else

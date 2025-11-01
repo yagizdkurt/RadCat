@@ -371,7 +371,7 @@ void MinixController::setCurrent(double voltage) {
         }
     }
 
-    if (voltagekV * voltage > SafeWattageMW)  Debug.Error("SetCurrent: Power too high, not setting current."); return;
+    if (voltagekV * voltage > SafeWattageMW)  { Debug.Error("SetCurrent: Power too high, not setting current."); return; }
 
     currentuA = voltage;
     voltage += 0.00001;

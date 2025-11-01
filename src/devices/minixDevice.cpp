@@ -412,3 +412,4 @@ bool MiniXDevice::safetyChecks() {
 
     return true;
 }
+

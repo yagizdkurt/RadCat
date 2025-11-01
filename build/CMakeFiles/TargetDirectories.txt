@@ -1,0 +1,7 @@
+C:/Users/WWW/Desktop/RadCat/RadCat-Develop/build/CMakeFiles/RadCat.dir
+C:/Users/WWW/Desktop/RadCat/RadCat-Develop/build/CMakeFiles/edit_cache.dir
+C:/Users/WWW/Desktop/RadCat/RadCat-Develop/build/CMakeFiles/rebuild_cache.dir
+C:/Users/WWW/Desktop/RadCat/RadCat-Develop/build/CMakeFiles/list_install_components.dir
+C:/Users/WWW/Desktop/RadCat/RadCat-Develop/build/CMakeFiles/install.dir
+C:/Users/WWW/Desktop/RadCat/RadCat-Develop/build/CMakeFiles/install/local.dir
+C:/Users/WWW/Desktop/RadCat/RadCat-Develop/build/CMakeFiles/install/strip.dir

@@ -7,6 +7,7 @@
 #include <vector>
 #include <typeindex>
 #include <algorithm>
+#include <chrono>
 #include "deviceRegistry.hpp"
 
 // Device registration macro REGISTER_DEVICE(class, "Name");
@@ -64,25 +65,27 @@ public:
         static std::vector<std::type_index> get() { return { std::type_index(typeid(Ts))... }; }
     };
 
-    void systemUpdate(){
+    // Tasks
+    void systemUpdate() {
         componentUpdate();
         update();
         if (!tasksActive) return;
+
         auto now = std::chrono::steady_clock::now();
         for (auto& t : tasks) {
-            if (std::chrono::duration_cast<std::chrono::milliseconds>(now - t.lastUpdate).count() >= t.intervalMs) {
+            if (now >= t.nextUpdate) {
                 t.task();
-                t.lastUpdate = now;
+                t.nextUpdate = now + std::chrono::milliseconds(t.intervalMs);
             }
         }
     }
 
     void addTask(std::function<void()> func, int intervalMs) {
-    PeriodicTask t;
-    t.intervalMs = intervalMs;
-    t.task = func;
-    t.nextUpdate = std::chrono::steady_clock::now() + std::chrono::milliseconds(intervalMs);
-    tasks.push_back(t);
+        PeriodicTask t;
+        t.intervalMs = intervalMs;
+        t.task = func;
+        t.nextUpdate = std::chrono::steady_clock::now() + std::chrono::milliseconds(intervalMs);
+        tasks.push_back(t);
     }
 
 protected:

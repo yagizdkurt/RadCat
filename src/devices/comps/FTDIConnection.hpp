@@ -5,18 +5,7 @@
 
 COMPONENT class FTDIConnection : public BaseComponent {
 public:
-    template<typename DeviceType> FTDIConnection(DeviceType& parentDevice) : 
-    parent(&parentDevice),
-    ftHandle(nullptr),
-    ftStatus(FT_OK),
-    bytesWritten(0),
-    bytesRead(0),
-    FTDIIndex(-1),
-    tryingToConnect(false),
-    connected(false),
-    deviceIsOpen(false),
-    setupDone(false),
-    myDeviceName("") {
+    template<typename DeviceType> FTDIConnection(DeviceType& parentDevice) : BaseComponent(&parentDevice) {
         // Initialization
         Initialize();
     }
@@ -41,12 +30,12 @@ public:
 private:
     
     static constexpr bool debug = false; //Debug flag
-    FT_HANDLE ftHandle;
-    FT_STATUS ftStatus;
+    FT_HANDLE ftHandle = nullptr;
+    FT_STATUS ftStatus = FT_OK;
     FT_DEVICE_LIST_INFO_NODE devInfo;
-    DWORD bytesWritten;
-    DWORD bytesRead;
-    std::string myDeviceName;
+    DWORD bytesWritten = 0;
+    DWORD bytesRead = 0;
+    std::string myDeviceName = "";
     int FTDIIndex = -1;
     bool setupDone = false;
     bool connected = false;

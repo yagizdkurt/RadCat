@@ -25,7 +25,6 @@ bool Controller::systemInitializor() {
 #pragma region: THREAD METHODS ----
 
 void Controller::run(){
-    pybind11::gil_scoped_release release;
         //Create and start the logic thread
         LogicThread = thread([this]() {
         while (isRunning) {

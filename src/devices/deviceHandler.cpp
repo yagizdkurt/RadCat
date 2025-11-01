@@ -12,7 +12,6 @@ int DeviceHandler::FTDIScan() {
     status = FT_CreateDeviceInfoList(&numDevs);
     if (status != FT_OK) {Debug.Error("Error getting device list: " , status); return -1;}
     if (numDevs == 0) {Debug.Warn("No FTDI devices found."); return 0;}
-    else if (numDevs < 0) {Debug.Error("Negative number of devices found, unexpected error."); return -1;}
     if constexpr(debug) Debug.Log("Number of FTDI devices found: " + std::to_string(numDevs));
 
     auto FTDIDevices = DeviceRegistry::getRegisteredDevicesWithComponents<FTDIConnection>();

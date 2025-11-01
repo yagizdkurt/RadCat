@@ -1,0 +1,15 @@
+# ninja log v7
+11	27	7837358629645959	C:/Users/WWW/Desktop/RadCat/RadCat-Develop/build/CMakeFiles/cmake.verify_globs	87b8ebe287a0f9f6
+43	100	7837358629967688	CMakeFiles/RadCat.dir/src/devices/comps/UI.cpp.obj	efc6c81b543b3567
+35	1089	7837358629890155	CMakeFiles/RadCat.dir/src/TimeManager.cpp.obj	21e7b22305ef9c11
+74	1304	7837358630268429	CMakeFiles/RadCat.dir/src/utilities.cpp.obj	f6cb50e66955f4f8
+47	1834	7837358630004188	CMakeFiles/RadCat.dir/src/devices/comps/minxUtils.cpp.obj	59cf2c0510e2c3e8
+60	1933	7837358630127642	CMakeFiles/RadCat.dir/src/main.cpp.obj	d0ce780afd679669
+32	1980	7837358629854573	CMakeFiles/RadCat.dir/src/DataIOHandler.cpp.obj	124469cf28942b91
+39	2020	7837358629922395	CMakeFiles/RadCat.dir/src/devices/comps/FTDIConnection.cpp.obj	2603993abdac006e
+69	2020	7837358630225260	CMakeFiles/RadCat.dir/src/udpHandler.cpp.obj	5dda904a74b8d160
+64	2040	7837358630180359	CMakeFiles/RadCat.dir/src/minixc.cpp.obj	c5df8a0e23e9a5e7
+28	2115	7837358629816162	CMakeFiles/RadCat.dir/src/App.cpp.obj	fa6e80780fd1a020
+51	2157	7837358630037787	CMakeFiles/RadCat.dir/src/devices/deviceHandler.cpp.obj	3341d4caf4d05a36
+55	2371	7837358630084141	CMakeFiles/RadCat.dir/src/devices/minixDevice.cpp.obj	92ee39475ec73ada
+2371	2555	7837358653246438	bin/RadCat.exe	301f8c3a274252df

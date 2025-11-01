@@ -7,7 +7,6 @@
 #include <atomic>
 #include <queue>
 #include <functional>
-#include <pybind11/pybind11.h>
 #include "TimeManager.hpp"
 #include "Debug.hpp"
 #include "DataIOHandler.hpp"

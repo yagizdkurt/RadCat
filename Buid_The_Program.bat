@@ -21,8 +21,9 @@ if exist %INSTALL_DIR% (
 
 REM === CONFIGURE CMAKE ===
 echo.
-echo Configuring project with CMake...
-cmake -S . -B %BUILD_DIR% -G %GENERATOR% -DCMAKE_BUILD_TYPE=%BUILD_TYPE%
+echo [1/3] Configuring project with CMake...
+cmake -S . -B %BUILD_DIR% -G %GENERATOR% -DCMAKE_BUILD_TYPE=%BUILD_TYPE% >nul
+echo Done.
 
 if %errorlevel% neq 0 (
     echo CMake configuration failed!
@@ -32,8 +33,9 @@ if %errorlevel% neq 0 (
 
 REM === BUILD ===
 echo.
-echo Building project...
-cmake --build %BUILD_DIR% --config %BUILD_TYPE%
+echo [2/3] Building project...
+cmake --build %BUILD_DIR% --config %BUILD_TYPE% >nul
+echo Done.
 
 if %errorlevel% neq 0 (
     echo Build failed!
@@ -43,13 +45,14 @@ if %errorlevel% neq 0 (
 
 REM === OPTIONAL: INSTALL ===
 echo.
-echo Installing to %INSTALL_DIR%...
-cmake --install %BUILD_DIR% --prefix %INSTALL_DIR%
+echo [3/3] Installing project...
+cmake --install %BUILD_DIR% --prefix %INSTALL_DIR% >nul
+echo Done.
 
 REM === DONE ===
 echo.
 echo ==========================================
-echo ✅ Build complete! Output in: %INSTALL_DIR%
+echo Build complete! Output in: %INSTALL_DIR%
 echo ==========================================
 echo.
 pause
