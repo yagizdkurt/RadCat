@@ -27,7 +27,7 @@ public:
 };
 
 struct PeriodicTask {
-    std::chrono::steady_clock::time_point lastUpdate;
+    std::chrono::steady_clock::time_point nextUpdate;
     int intervalMs;
     std::function<void()> task;
 };
@@ -35,8 +35,8 @@ struct PeriodicTask {
 // All devices should inherit from this template
 template<typename... Components> class BaseDevice : public EmptyDevice {
 public:
-    BaseDevice() : components(Components(*this)...) {}
-    virtual ~BaseDevice() {}
+    BaseDevice() : components(Components(*this)...) { }
+    virtual ~BaseDevice() { }
 
     // Pure virtual methods to be implemented by derived classes
     virtual bool connect() = 0;
@@ -75,6 +75,14 @@ public:
                 t.lastUpdate = now;
             }
         }
+    }
+
+    void addTask(std::function<void()> func, int intervalMs) {
+    PeriodicTask t;
+    t.intervalMs = intervalMs;
+    t.task = func;
+    t.nextUpdate = std::chrono::steady_clock::now() + std::chrono::milliseconds(intervalMs);
+    tasks.push_back(t);
     }
 
 protected:

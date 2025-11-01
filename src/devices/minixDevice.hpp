@@ -5,8 +5,7 @@
 class MiniXDevice : public BaseDevice<FTDIConnection> {
 public:
     static constexpr bool debug = false;
-    MiniXDevice() { startingParameters(); setupTasks(); }
-    std::chrono::steady_clock::time_point lastUpdate = std::chrono::steady_clock::now();
+    MiniXDevice() : BaseDevice() { startingParameters(); setupTasks(); }
     static inline const DeviceRegistry::RegistryEntry::DeviceInfo deviceInfo = {"Mini-X","1.0","Manufacturer","Description"};
 
     // Implement virtual methods

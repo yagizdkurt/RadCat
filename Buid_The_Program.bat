@@ -1,66 +1,56 @@
 @echo off
+setlocal
 
-REM Clean up previous builds
-if exist dist (
-    echo Deleting existing dist folder...
-    for /l %%i in (1,1,5) do echo.
-    rmdir /s /q dist
+REM === CONFIGURATION ===
+set BUILD_DIR=build
+set INSTALL_DIR=dist
+set GENERATOR="Ninja"
+set BUILD_TYPE=Debug
+set TARGET_NAME=RadCat
+
+REM === CLEAN PREVIOUS BUILDS ===
+if exist %BUILD_DIR% (
+    echo Cleaning build directory...
+    rmdir /s /q %BUILD_DIR%
 )
 
-REM Ensure dependencies
-python -m pip install --upgrade pip setuptools wheel pybind11
-
-REM Create temporary build folder to avoid clutter
-set TEMP_BUILD=temp_build
-
-if exist %TEMP_BUILD% (
-    rmdir /s /q %TEMP_BUILD%
+if exist %INSTALL_DIR% (
+    echo Cleaning install directory...
+    rmdir /s /q %INSTALL_DIR%
 )
 
-mkdir %TEMP_BUILD%
-
-if exist pyt\*pyd (
-    del /q pyt\*pyd
-)
-
-REM Build the module:
-REM - --build-lib pyt  -> final .pyd goes to 'pyt'
-REM - --build-temp temp_build -> temporary files go here
-for /l %%i in (1,1,5) do echo.
-echo Building the module, please wait... this may take a moment.
-for /l %%i in (1,1,5) do echo.
-python setup.py build_ext --build-lib pyt --build-temp temp_build 
-
-REM > nul 2>&1
-
-
-REM Clean up temporary build folder
-rmdir /s /q %TEMP_BUILD%
-
-for /l %%i in (1,1,10) do echo.
-echo Module built complete. Making Executable.
-
-REM Get Python executable path and derive Scripts directory
-for /f "delims=" %%i in ('python -c "import sys; print(sys.executable)"') do set PYTHON_PATH=%%i
-for %%i in ("%PYTHON_PATH%") do set PYTHON_DIR=%%~dpi
-set SCRIPTS_DIR=%PYTHON_DIR%Scripts
-
-echo Using PyInstaller from: %SCRIPTS_DIR%
-"%SCRIPTS_DIR%\pyinstaller.exe" MyProgram.spec
+REM === CONFIGURE CMAKE ===
+echo.
+echo Configuring project with CMake...
+cmake -S . -B %BUILD_DIR% -G %GENERATOR% -DCMAKE_BUILD_TYPE=%BUILD_TYPE%
 
 if %errorlevel% neq 0 (
-    echo PyInstaller failed, trying alternative method...
-    python -m PyInstaller MyProgram.spec
+    echo CMake configuration failed!
+    pause
+    exit /b 1
 )
 
-REM rmdir /s /q build
+REM === BUILD ===
+echo.
+echo Building project...
+cmake --build %BUILD_DIR% --config %BUILD_TYPE%
 
-REM cd pyt
-REM del /q YDYTU1_py.cp39-win_amd64.pyd
-REM cd ..
+if %errorlevel% neq 0 (
+    echo Build failed!
+    pause
+    exit /b 1
+)
 
-for /l %%i in (1,1,30) do echo.
-echo Everything is complete, check the 'dist' folder for output.
-echo Press any key to exit.
+REM === OPTIONAL: INSTALL ===
+echo.
+echo Installing to %INSTALL_DIR%...
+cmake --install %BUILD_DIR% --prefix %INSTALL_DIR%
 
+REM === DONE ===
+echo.
+echo ==========================================
+echo ✅ Build complete! Output in: %INSTALL_DIR%
+echo ==========================================
+echo.
 pause
+endlocal

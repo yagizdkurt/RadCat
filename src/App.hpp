@@ -11,7 +11,6 @@
 #include "TimeManager.hpp"
 #include "Debug.hpp"
 #include "DataIOHandler.hpp"
-#include "pyManager.hpp"
 #include "udpHandler.hpp"
 
 using namespace std;
@@ -28,11 +27,9 @@ private:
 public:
     //Modules
     DIOHandler dataHandler;
-    PyManager pyManager;
-    PyManager& getPyManager() { return pyManager; }
     UDPHandler udpHandler;
 
-    Controller() : dataHandler(this), pyManager(this), udpHandler() { if(systemInitializor()) run(); }
+    Controller() : dataHandler(this), udpHandler() { if(systemInitializor()) run(); }
     ~Controller(){}
 
     //Main Methods

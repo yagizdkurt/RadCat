@@ -107,14 +107,12 @@ void MiniXDevice::update() {
     safetyChecks();
 }
 
-void MiniXDevice::setupTasks() { 
-    tasks = {
-            {std::chrono::steady_clock::now(), 1000, [this]{ currentTemperature = readTemperature(); }},
-            {std::chrono::steady_clock::now(), 2000, [this]{ currentCurrent = readCurrent(); }},
-            {std::chrono::steady_clock::now(), 3000, [this]{ currentVoltage = readVoltage(); }},
-            // ...
-    };
+void MiniXDevice::setupTasks() {
+    addTask([this]{ currentTemperature = readTemperature(); }, 1000);
+    addTask([this]{ currentCurrent = readCurrent(); }, 2000);
+    addTask([this]{ currentVoltage = readVoltage(); }, 3000);
 }
+
 
 double MiniXDevice::readValue(const std::string& parameter) {
     // Implement reading values based on the parameter
