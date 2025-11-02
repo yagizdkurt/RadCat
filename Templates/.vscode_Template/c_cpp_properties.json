@@ -8,12 +8,20 @@
                 "${workspaceFolder}/src/devices",
                 "${workspaceFolder}/src/devices/comps",
                 "${workspaceFolder}/src/Included",
+<<<<<<< HEAD:.vscode/c_cpp_properties.json
                 "${workspaceFolder}/src/Included/Windows",
                 "C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/um",
                 "C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/shared",
                 "C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/ucrt",
                 "C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/winrt",
                 "${env:ROOTSYS}/include"
+=======
+                "${env:ROOTSYS}/include",
+                "${env:QT_DIR}/include",
+                "${env:QT_DIR}/include/QtCore",
+                "${env:QT_DIR}/include/QtGui",
+                "${env:QT_DIR}/include/QtWidgets"
+>>>>>>> 5c3f7359a5ae706fc319f1138c81547fe244b5f3:Templates/.vscode_Template/c_cpp_properties.json
             ],
             "defines": [
                 "_DEBUG",
