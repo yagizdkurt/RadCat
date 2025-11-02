@@ -8,11 +8,27 @@ set GENERATOR="Ninja"
 set BUILD_TYPE=Debug
 set TARGET_NAME=RadCat
 
+REM === SETUP MSVC ENVIRONMENT (so link.exe can find MSVCRTD.lib) ===
+REM Check for vcvars and call it (avoid multi-line parenthesis blocks to prevent parsing issues)
+if exist "D:\VS\VC\Auxiliary\Build\vcvarsall.bat" goto :vcvars_found
+echo Warning: vcvarsall.bat not found at D:\VS\VC\Auxiliary\Build\vcvarsall.bat
+echo If you have Visual Studio installed in a different location, update this script
+echo or run the "x64 Native Tools Command Prompt for VS" before running this batch.
+goto :vcvars_done
+
+:vcvars_found
+echo Setting up Visual Studio build environment (vcvarsall)...
+call "D:\VS\VC\Auxiliary\Build\vcvarsall.bat" amd64 >nul
+
+:vcvars_done
+
 REM === CLEAN PREVIOUS BUILDS ===
 if exist %BUILD_DIR% (
     echo Cleaning build directory...
     rmdir /s /q %BUILD_DIR%
 )
+
+echo [DEBUG] After cleaning build dir
 
 if exist %INSTALL_DIR% (
     echo Cleaning install directory...

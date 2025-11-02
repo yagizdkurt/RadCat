@@ -80,6 +80,7 @@
         "queue": "cpp"
     },
     "editor.codeLens": true,
-    "C_Cpp.codeLens.enabled": true
+    "C_Cpp.codeLens.enabled": true,
+    "C_Cpp.default.compilerPath": "cl.exe"
 }
 
