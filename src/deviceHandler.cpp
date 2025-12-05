@@ -1,5 +1,5 @@
 #include "deviceHandler.hpp"
-#include "debug.hpp"
+#include "Debug.hpp"
 #include "ftd2xx.h"
 #include "allComponents.hpp"
 #include "FTDIHandler.hpp"

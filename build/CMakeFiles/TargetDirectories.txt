@@ -1,0 +1,5 @@
+/home/kali/projects/RadCat/build/CMakeFiles/RadCat.dir
+/home/kali/projects/RadCat/build/CMakeFiles/edit_cache.dir
+/home/kali/projects/RadCat/build/CMakeFiles/rebuild_cache.dir
+/home/kali/projects/RadCat/build/CMakeFiles/RadCat_autogen_timestamp_deps.dir
+/home/kali/projects/RadCat/build/CMakeFiles/RadCat_autogen.dir

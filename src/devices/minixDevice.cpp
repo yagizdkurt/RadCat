@@ -1,6 +1,6 @@
 #include "miniXDevice.hpp"
 #include "ftd2xx.h"
-#include "debug.hpp"
+#include "Debug.hpp"
 #include "utilities.hpp"
 
 REGISTER_DEVICE(MiniXDevice,"Mini-X");

@@ -1,8 +1,8 @@
 #include "FTDIHandler.hpp"
-#include "debug.hpp"
+#include "Debug.hpp"
 #include <thread>
 #include <chrono>
-#include "Utilities.hpp"
+#include "utilities.hpp"
 using namespace Utilities;
 
 
