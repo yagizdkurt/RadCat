@@ -1,7 +1,7 @@
 #include "deviceHandler.hpp"
 #include "Debug.hpp"
 #include "ftd2xx.h"
-#include "allComponents.hpp"
+#include "Components/allComponents.hpp"
 #include "FTDIHandler.hpp"
 #include "LibUsbHandler.hpp"
 

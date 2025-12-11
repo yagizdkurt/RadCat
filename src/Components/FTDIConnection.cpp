@@ -1,7 +1,7 @@
 #include "FTDIConnection.hpp"
 #include "Debug.hpp"
 #include "utilities.hpp"
-#include "deviceCore.hpp"
+#include "devices/deviceCoreSystems/deviceCore.hpp"
 
 using namespace Utilities;
 

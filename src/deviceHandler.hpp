@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <memory>
-#include "deviceCore.hpp"
+#include "devices/deviceCoreSystems/deviceCore.hpp"
 
 
 class DeviceHandler {
