@@ -1,6 +1,6 @@
 #pragma once
 #include "udpHandler.hpp"
-#include "DeviceHandler.hpp"
+#include "deviceHandler.hpp"
 
 using namespace std;
 

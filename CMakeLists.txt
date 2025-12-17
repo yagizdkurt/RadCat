@@ -1,6 +1,12 @@
 # ---- Project And C++ ----
 cmake_minimum_required(VERSION 3.21)
 project(RadCat VERSION 0.1 LANGUAGES CXX)
+
+# PIE (Position Independent Executable) zorunluluğunu kaldır
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -no-pie")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -no-pie")
+
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -32,26 +38,64 @@ add_executable(${PROJECT_NAME} ${SRC_FILES})
 # ---- Include directories ----
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/src/Components
     ${CMAKE_SOURCE_DIR}/src/devices
-    ${CMAKE_SOURCE_DIR}/src/devices/comps
+    ${CMAKE_SOURCE_DIR}/src/devices/deviceCoreSystems
     ${CMAKE_SOURCE_DIR}/src/CompHandlers
+    ${CMAKE_SOURCE_DIR}/src/Included
+    
+    
 )
 
 # ---- Get Platform and platform specific includes ----
+# ---- Platform and platform specific includes (DÜZELTİLMİŞ TAM BLOK) ----
+
 if (WIN32)
+    message(STATUS "Platform: Windows Detected")
     target_compile_definitions(${PROJECT_NAME} PRIVATE PLATFORM_WINDOWS)
     target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src/Included/Windows)
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src/libs/ftd2xx.lib) # Link FTDI
-    target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32) # Link Winsock
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src/libs/ftd2xx.lib) 
+    target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32)
+
 elseif (APPLE)
+    message(STATUS "Platform: macOS Detected")
     target_compile_definitions(${PROJECT_NAME} PRIVATE PLATFORM_MACOS)
     target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src/Included/Mac)
-    target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/src/libs/libftd2xx.dylib") # Link FTDI
+    
+    find_library(FTDI_LIB_MAC ftd2xx HINTS "${CMAKE_SOURCE_DIR}/src/libs" "/usr/local/lib" "/opt/homebrew/lib")
+    if(FTDI_LIB_MAC)
+        target_link_libraries(${PROJECT_NAME} PRIVATE ${FTDI_LIB_MAC})
+    else()
+        message(FATAL_ERROR "FTDI Library not found for macOS! Please install drivers.")
+    endif()
+
 else()
+    # --- LINUX KISMI (BURAYI GARANTİ HALE GETİRDİK) ---
+    message(STATUS "Platform: Linux Detected")
     target_compile_definitions(${PROJECT_NAME} PRIVATE PLATFORM_LINUX)
     target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src/Included/Linux)
-    target_link_libraries(${PROJECT_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/src/libs/libftd2xx.so") # Link FTDI
+    
+    # 1. FTDI Kütüphanesini "İthal Hedef" (Imported Target) olarak tanımla
+    # Bu yöntemle CMake dosyayı bulamama ihtimalini ortadan kaldırır.
+    add_library(FTDI_STATIC STATIC IMPORTED)
+
+    # 2. Dosyanın yerini KESİN olarak göster
+    set_target_properties(FTDI_STATIC PROPERTIES 
+        IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/src/Included/Linux/libftd2xx.a"
+    )
+
+    # 3. Bağlama İşlemi (Önce bizim hedef, sonra sistem kütüphaneleri)
+    target_link_libraries(${PROJECT_NAME} PRIVATE 
+        FTDI_STATIC
+        pthread
+        dl
+        usb-1.0
+    )
+
 endif()
+
+
+
 
 # ---- Dependencies / LIBRARIES ----
 
@@ -64,15 +108,15 @@ if (WIN32)
             "$<TARGET_FILE_DIR:${PROJECT_NAME}>/FTD2XX.dll")
 endif()
 
-    ## --- Qt ---
+## --- Qt ---
     set(QT_REQUIRED_COMPONENTS Core Gui Widgets)
     find_package(Qt6 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets)
 
-    ## --- ROOT ---
-    find_package(ROOT REQUIRED)
-    target_include_directories(${PROJECT_NAME} PRIVATE ${ROOT_INCLUDE_DIRS})
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${ROOT_LIBRARIES})
+   ## --- ROOT ---
+   find_package(ROOT REQUIRED)
+   target_include_directories(${PROJECT_NAME} PRIVATE ${ROOT_INCLUDE_DIRS})
+   target_link_libraries(${PROJECT_NAME} PRIVATE ${ROOT_LIBRARIES})
 
 # ---- Compiler warnings ----
 if (MSVC)
@@ -86,3 +130,4 @@ else()
 endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # IDE
+find_library(FTDI_LIB ftd2xx PATHS /usr/local/lib NO_DEFAULT_PATH)

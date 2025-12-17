@@ -1,5 +1,5 @@
 #include "LibUsbHandler.hpp"
-#include "debug.hpp"
+#include "Debug.hpp"
 
 struct DeviceListGuard {
     libusb_device** list;

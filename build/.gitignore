@@ -1,0 +1,28 @@
+# --- Build ve Derleme Çöpleri ---
+build/
+dist/
+bin/
+*.o
+*.obj
+*.exe
+*.out
+
+# --- VS Code Ayarları ---
+.vscode/
+.idea/
+
+# --- CMake Geçici Dosyaları ---
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# --- Sistem Dosyaları ---
+.DS_Store
+Thumbs.db
+
+
+
+# --- Istisnai gömülü dosya(libftd2xx.a) ---
+*.a
+!src/Included/Linux/libftd2xx.a  

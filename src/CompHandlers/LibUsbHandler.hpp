@@ -1,6 +1,6 @@
 #pragma once
-#include "included/libusb.h"
-#include "CompHandlers/BaseComponentHandler.hpp"
+#include "libusb.h"
+#include "BaseComponentHandler.hpp"
 #include <vector>
 #include <string>
 #include "UsbConnection.hpp"
