@@ -1,9 +1,9 @@
 #pragma once
-#include "Included/libusb.h"
-#include "CompHandlers/BaseComponentHandler.hpp"
+#include "libusb.h"
+#include "BaseComponentHandler.hpp"
 #include <vector>
 #include <string>
-#include "Components/UsbConnection.hpp"
+#include "UsbConnection.hpp"
 
 struct ScannedDeviceInfo {
     libusb_device* device;

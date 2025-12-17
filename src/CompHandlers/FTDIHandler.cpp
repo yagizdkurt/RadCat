@@ -5,11 +5,6 @@
 #include "utilities.hpp"
 using namespace Utilities;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
 bool FTDIHandler::initialize() {
    
     return true;
@@ -174,7 +169,3 @@ int FTDIHandler::getDeviceCount() {
     if constexpr(debug) Debug.Log("Number of FTDI devices found: " , numDevs);
     return static_cast<int>(numDevs);
 }
-
-#ifdef __cplusplus
-}
-#endif

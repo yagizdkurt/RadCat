@@ -1,6 +1,6 @@
 #pragma once
-#include "devices/deviceCoreSystems/deviceCore.hpp"
-#include "Components/FTDIConnection.hpp"
+#include "deviceCore.hpp"
+#include "FTDIConnection.hpp"
 
 class MiniXDevice : public BaseDevice<FTDIConnection> {
 public:

@@ -38,9 +38,13 @@ add_executable(${PROJECT_NAME} ${SRC_FILES})
 # ---- Include directories ----
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/src/Components
     ${CMAKE_SOURCE_DIR}/src/devices
-    ${CMAKE_SOURCE_DIR}/src/devices/comps
+    ${CMAKE_SOURCE_DIR}/src/devices/deviceCoreSystems
     ${CMAKE_SOURCE_DIR}/src/CompHandlers
+    ${CMAKE_SOURCE_DIR}/src/Included
+    
+    
 )
 
 # ---- Get Platform and platform specific includes ----

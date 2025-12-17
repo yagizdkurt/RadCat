@@ -1,4 +1,4 @@
-#include "devices/minixDevice.hpp"
+#include "minixDevice.hpp"
 #include "ftd2xx.h"
 #include "Debug.hpp"
 #include "utilities.hpp"
